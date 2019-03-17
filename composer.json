@@ -1,0 +1,53 @@
+{
+    "name": "typo3/cms-graphql",
+    "type": "typo3-cms-framework",
+    "description": "The GraphQL library of TYPO3.",
+    "homepage": "https://typo3.org",
+    "license": ["GPL-2.0-or-later"],
+    "authors": [{
+        "name": "TYPO3 Core Team",
+        "email": "typo3cms@typo3.org",
+        "role": "Developer"
+    }],
+    "config": {
+        "sort-packages": true
+    },
+    "require": {
+        "typo3/cms-core": "10.0.*@dev",
+        "typo3/cms-configuration": "10.0.*@dev",
+        "hoa/compiler": "~3.0",
+        "webmozart/assert": "^1.0",
+        "webonyx/graphql-php": "^0.13"
+    },
+    "require-dev": {
+        "typo3/testing-framework": "~5.0.5"
+    },
+    "conflict": {
+        "typo3/cms": "*"
+    },
+    "replace": {
+        "graphql": "*"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "10.0.x-dev"
+        },
+        "typo3/cms": {
+            "extension-key": "graphql",
+            "Package": {
+                "partOfFactoryDefault": true
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "TYPO3\\CMS\\Core\\GraphQL\\": "Classes/GraphQL/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TYPO3\\CMS\\Core\\Tests\\Unit\\GraphQL\\": "Tests/Unit/GraphQL/",
+            "TYPO3\\CMS\\Core\\Tests\\Functional\\GraphQL\\": "Tests/Functional/GraphQL/"
+        }
+    }
+}
