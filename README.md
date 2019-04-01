@@ -1,10 +1,8 @@
 # GraphQL
 
-This extension integrates GraphQL into TYPO3 CMS.
+This extension integrates GraphQL into TYPO3 CMS. Currently it provides read an API for managed tables. For more information about the planned features see the [draft](https://docs.google.com/document/d/1M-V9H9W_tmWZI-Be9Zo5xTZUMgwJk2dMUxOFw-waO04/).
 
 *This implementation is a proof-of-concept prototype and thus experimental development. Since not all planned features are implemented, this extension should not be used for production sites.*
-
-Currently it provides read an API for managed tables. For more information about the planned features see the [draft](https://docs.google.com/document/d/1M-V9H9W_tmWZI-Be9Zo5xTZUMgwJk2dMUxOFw-waO04/).
 
 ## Installation
 
@@ -19,6 +17,8 @@ composer require typo3incubator/graphql
 The *entity reader* provides an easy access to the managed tables of TYPO3 CMS:
 
 ```php
+use TYPO3\CMS\Core\GraphQL;
+
 $reader = new EntityReader();
 $result = $reader->execute('
     tt_content {
