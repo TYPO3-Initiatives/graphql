@@ -49,23 +49,5 @@
             "TYPO3\\CMS\\Core\\Tests\\Unit\\GraphQL\\": "Tests/Unit/GraphQL/",
             "TYPO3\\CMS\\Core\\Tests\\Functional\\GraphQL\\": "Tests/Functional/GraphQL/"
         }
-    },
-    "scripts": {
-        "ci:php:lint": "find *.php Classes/ Configuration/ Tests/ -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l",
-        "ci:tests:unit": "phpunit -c .Build/vendor/typo3/testing-framework/Resources/Core/Build/UnitTests.xml Tests/Unit/",
-        "ci:tests:functional": "phpunit -c .Build/vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTests.xml Tests/Functional/",
-        "ci:tests": [
-            "@ci:tests:unit",
-            "@ci:tests:functional"
-        ],
-        "ci:dynamic": [
-            "@ci:tests"
-        ],
-        "ci:static": [
-            "@ci:php:lint"
-        ],
-        "ci": [
-            "@ci:static"
-        ]
     }
 }
