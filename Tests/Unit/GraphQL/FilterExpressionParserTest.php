@@ -16,11 +16,8 @@ namespace TYPO3\CMS\Core\Tests\Unit\GraphQL;
  */
 
 use Hoa\Compiler\Llk\TreeNode;
-use TYPO3\CMS\Core\GraphQL\FilterParser;
-use TYPO3\CMS\Core\GraphQL\SyntaxException;
+use TYPO3\CMS\Core\GraphQL\FilterExpressionParser;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
-
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /*
 * Test case
@@ -58,7 +55,7 @@ class FilterExpressionParserTest extends UnitTestCase
     public function parseThrowsSyntaxExceptionForInvalidExpressions($expression)
     {
         $this->expectException(\Hoa\Compiler\Exception\Exception::class);
-        FilterParser::parse($expression);
+        FilterExpressionParser::parse($expression);
     }
 
     public function expressionProvider()
@@ -509,7 +506,7 @@ class FilterExpressionParserTest extends UnitTestCase
         $this->assertEquals($this->buildTree([
             'id' => '#expression',
             'children' => [$expected]
-        ]), FilterParser::parse($expression));
+        ]), FilterExpressionParser::parse($expression));
     }
 
     protected function buildTree(array $array)
