@@ -45,12 +45,20 @@ You can use the following `composer.json` if you want to contribute:
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/typo3incubator/graphql.git"
+            "url": "https://github.com/typo3incubator/configuration"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/typo3incubator/graphql"
         }
     ],
     "require": {
         "typo3/cms-graphql": "10.0.*@dev"
     },
+    "require-dev": {
+        "typo3/testing-framework": "^5.0"
+    },
+    "prefer-stable": true,
     "minimum-stability": "dev"
 }
 ```
