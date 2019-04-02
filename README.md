@@ -12,6 +12,7 @@ Use composer to install this extension in your project:
 
 ```bash
 composer config repositories.graphql git https://github.com/typo3incubator/graphql
+composer config repositories.configuration git https://github.com/typo3incubator/configuration
 composer require typo3/cms-graphql
 ```
 
