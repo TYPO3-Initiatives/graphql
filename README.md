@@ -1,6 +1,6 @@
 # GraphQL
 
-[![Build Status](https://travis-ci.com/TYPO3incubator/graphql.svg?branch=master)](https://travis-ci.com/TYPO3incubator/graphql)
+[![Build Status](https://travis-ci.com/TYPO3-Initiatives/graphql.svg?branch=master)](https://travis-ci.com/TYPO3-Initiatives/graphql)
 
 This extension integrates GraphQL into TYPO3 CMS. Currently it provides read an API for managed tables. For more information about the planned features see the [draft](https://docs.google.com/document/d/1M-V9H9W_tmWZI-Be9Zo5xTZUMgwJk2dMUxOFw-waO04/).
 
