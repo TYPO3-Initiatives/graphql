@@ -11,8 +11,9 @@ This extension integrates GraphQL into TYPO3 CMS. Currently it provides read an 
 Use composer to install this extension in your project:
 
 ```bash
-composer config repositories.graphql git https://github.com/typo3incubator/graphql
-composer config repositories.configuration git https://github.com/typo3incubator/configuration
+composer config repositories.graphql git https://github.com/typo3-initiatives/graphql
+composer config repositories.configuration git https://github.com/typo3-initiatives/configuration
+composer config repositories.security git https://github.com/typo3-initiatives/security
 composer require typo3/cms-graphql
 ```
 
@@ -46,11 +47,15 @@ You can use the following `composer.json` if you want to contribute:
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/typo3incubator/configuration"
+            "url": "https://github.com/typo3-initiatives/configuration"
         },
         {
             "type": "git",
-            "url": "https://github.com/typo3incubator/graphql"
+            "url": "https://github.com/typo3-initiatives/graphql"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/typo3-initiatives/security"
         }
     ],
     "require": {
