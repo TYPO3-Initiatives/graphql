@@ -15,8 +15,9 @@ install:
   - >
     composer init --name build/travis --type project --stability dev --require typo3/cms-graphql:dev-master --require typo3/testing-framework:^5.0 --no-interaction;
     composer config prefer-stable true;
-    composer config repositories.0 git https://github.com/typo3incubator/graphql;
-    composer config repositories.1 git https://github.com/typo3incubator/configuration;
+    composer config repositories.0 git https://github.com/typo3-initiatives/graphql;
+    composer config repositories.1 git https://github.com/typo3-initiatives/configuration;
+    composer config repositories.2 git https://github.com/typo3-initiatives/security;
     composer install;
 
 script:
