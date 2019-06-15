@@ -10,24 +10,43 @@
         "role": "Developer"
     }],
     "config": {
+        "vendor-dir": ".build/vendor",
+        "bin-dir": ".build/bin",
         "sort-packages": true
     },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/typo3-initiatives/configuration"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/typo3-initiatives/security"
+        }
+    ],
     "require": {
         "typo3/cms-core": "10.0.*@dev",
         "typo3/cms-configuration": "10.0.*@dev",
         "typo3/cms-security": "10.0.*@dev",
+        "typo3/cms-backend": "10.0.*@dev",
+        "typo3/cms-frontend": "10.0.*@dev",
+        "typo3/cms-recordlist": "10.0.*@dev",
+        "typo3/cms-extbase": "10.0.*@dev",
+        "typo3/cms-fluid": "10.0.*@dev",
         "hoa/compiler": "^3.0",
         "webmozart/assert": "^1.0",
         "webonyx/graphql-php": "^0.13"
     },
     "require-dev": {
+        "codacy/coverage": "^1.4",
+        "slevomat/coding-standard": "^4.8",
         "typo3/testing-framework": "^5.0"
     },
     "conflict": {
         "typo3/cms": "*"
     },
     "replace": {
-        "graphql": "*"
+        "graphql": "self.version"
     },
     "extra": {
         "branch-alias": {
@@ -35,6 +54,8 @@
         },
         "typo3/cms": {
             "extension-key": "graphql",
+            "app-dir": ".build",
+            "web-dir": ".build/public",
             "Package": {
                 "partOfFactoryDefault": true
             }
@@ -42,6 +63,7 @@
     },
     "autoload": {
         "psr-4": {
+            "TYPO3\\CMS\\Core\\GraphQL\\Build\\": "Build/",
             "TYPO3\\CMS\\Core\\GraphQL\\": "Classes/GraphQL/"
         }
     },
@@ -50,5 +72,20 @@
             "TYPO3\\CMS\\Core\\Tests\\Unit\\GraphQL\\": "Tests/Unit/GraphQL/",
             "TYPO3\\CMS\\Core\\Tests\\Functional\\GraphQL\\": "Tests/Functional/GraphQL/"
         }
+    },
+    "scripts": {
+        "build:package:link": [
+            "TYPO3\\CMS\\Core\\GraphQL\\Build\\Composer\\ScriptHelper::linkPackage"
+        ],
+        "test:php:unit": [
+            "@php .build/bin/phpunit -c Build/UnitTests.xml"
+        ],
+        "test:php:functional": [
+            "@php .build/bin/phpunit -c Build/FunctionalTests.xml"
+        ],
+        "test": [
+            "@test:php:unit",
+            "@test:php:functional"
+        ]
     }
 }

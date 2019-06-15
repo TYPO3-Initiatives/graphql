@@ -1,3 +1,4 @@
+sudo: false
 language: php
 
 php:
@@ -10,29 +11,21 @@ addons:
 
 install:
   - >
-    mkdir -p .build
-    cd .build
-  - >
-    composer init --name build/travis --type project --stability dev --require typo3/cms-graphql:dev-master --require typo3/testing-framework:^5.0 --no-interaction;
-    composer config prefer-stable true;
-    composer config repositories.0 git https://github.com/typo3-initiatives/graphql;
-    composer config repositories.1 git https://github.com/typo3-initiatives/configuration;
-    composer config repositories.2 git https://github.com/typo3-initiatives/security;
     composer install;
 
 script:
   - >
     echo;
     echo "Running php lint";
-    find . -name \*.php ! -path "./*" | parallel --gnu php -d display_errors=stderr -l {} > /dev/null \;
+    find . -name \*.php ! -path "./.build/*" | parallel --gnu php -d display_errors=stderr -l {} > /dev/null \;
   - >
     echo;
     echo "Running unit tests";
-    vendor/bin/phpunit -c vendor/typo3/testing-framework/Resources/Core/Build/UnitTests.xml Tests/Unit/
+    vendor/bin/phpunit -c Build/UnitTests.xml --coverage-clover .build/clover.xml
   - >
     echo;
     echo "Running functional tests";
     export typo3DatabaseName="typo3";
     export typo3DatabaseHost="localhost";
     export typo3DatabaseUsername="root";
-    vendor/bin/phpunit -c vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTests.xml Tests/Functional/
+    vendor/bin/phpunit -c Build/FunctionalTests.xml
