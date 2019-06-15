@@ -34,7 +34,7 @@ class EntityReaderTest extends FunctionalTestCase
         'typo3/sysext/graphql/Tests/Functional/GraphQL/Fixtures/Extensions/persistence',
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->importCSVDataSet(__DIR__ . '/Fixtures/DataSet/LiveDefaultEntities.csv');
