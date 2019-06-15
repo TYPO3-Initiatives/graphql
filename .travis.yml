@@ -12,6 +12,7 @@ addons:
 install:
   - >
     composer install;
+    composer build:package:link
 
 script:
   - >
