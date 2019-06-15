@@ -21,11 +21,11 @@ script:
   - >
     echo;
     echo "Running unit tests";
-    vendor/bin/phpunit -c Build/UnitTests.xml --coverage-clover .build/clover.xml
+    .build/bin/phpunit -c Build/UnitTests.xml --coverage-clover .build/clover.xml
   - >
     echo;
     echo "Running functional tests";
     export typo3DatabaseName="typo3";
     export typo3DatabaseHost="localhost";
     export typo3DatabaseUsername="root";
-    vendor/bin/phpunit -c Build/FunctionalTests.xml
+    .build/bin/phpunit -c Build/FunctionalTests.xml
