@@ -3,15 +3,15 @@ declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use Traversable;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\ActiveEntityRelation;
-use TYPO3\CMS\Core\Configuration\MetaModel\ActivePropertyRelation;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\Database\Query\QueryHelper;
 use TYPO3\CMS\Core\GraphQL\AbstractEntityRelationResolver;
+use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Webmozart\Assert\Assert;
 
@@ -45,11 +45,6 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         return true;
     }
 
-    public function getArguments(): array
-    {
-        return [];
-    }
-
     public function collect($source, array $arguments, array $context, ResolveInfo $info)
     {
         Assert::keyExists($context, 'cache');
@@ -60,7 +55,14 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
         if ($source !== null) {
             Assert::keyExists($source, $this->getPropertyDefinition()->getName());
-            $keys = array_merge_recursive($keys, $this->getForeignKeys($source[$this->getPropertyDefinition()->getName()]));
+
+            foreach ($this->getForeignKeys((string)$source[$this->getPropertyDefinition()->getName()]) as $table => $identifier) {
+                $keys[$table][] = $identifier;
+            }
+
+            foreach ($keys as $table => $identifiers) {
+                $keys[$table] = array_keys(array_flip($identifiers));
+            }
         }
 
         $context['cache']->set($cacheIdentifier, $keys);
@@ -72,9 +74,10 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
 
-        $cacheIdentifier = $this->getCacheIdentifier('data');
-        $data = $context['cache']->get($cacheIdentifier) ?: [];
+        $cacheIdentifier = $this->getCacheIdentifier('buffer');
+        $buffer = $context['cache']->get($cacheIdentifier) ?: [];
         $result = [];
+        $tables = [];
 
         if (!$context['cache']->has($cacheIdentifier)) {
             $foreignKeyField = $this->getForeignKeyField();
@@ -84,19 +87,20 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
                 $statement = $builder->execute();
 
                 while ($row = $statement->fetch()) {
-                    $row['__table'] = $table;
-                    $data[$table][$row[$foreignKeyField]] = $row;
+                    $row[EntitySchemaFactory::ENTITY_TYPE_FIELD] = $table;
+                    $buffer[$table][$row[$foreignKeyField]] = $row;
                 }
             }
 
-            $context['cache']->set($cacheIdentifier, $data);
+            $context['cache']->set($cacheIdentifier, $buffer);
         }
 
-        foreach ($this->getForeignKeys($source[$this->getPropertyDefinition()->getName()]) as $table => $foreignKeys) {
-            foreach ($foreignKeys as $foreignKey) {
-                $result[] = $data[$table][$foreignKey];
-            }
+        foreach ($this->getForeignKeys((string)$source[$this->getPropertyDefinition()->getName()]) as $table => $identifier) {
+            $tables[$table] = true;
+            $result[] = $buffer[$table][$identifier];
         }
+
+        $result = $this->orderResult($arguments, $result, $info, array_keys($tables));
 
         return $result;
     }
@@ -115,7 +119,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         $builder->getRestrictions()
             ->removeAll();
 
-        $builder->select(...$this->getColumns($table, $builder, $info))
+        $builder->select(...$this->getColumns($table, $info))
             ->from($table);
 
         $condition = $this->getCondition($table, $keys, $builder, $info);
@@ -124,10 +128,9 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
             $builder->where(...$condition);
         }
 
-        $order = $this->getOrder($table, (array)$arguments['sort']);
-
-        foreach ($order as $item) {
-            $builder->addOrderBy($item[0], $item[1]);
+        foreach ($this->getOrderBy($arguments, $info, $table) as $item) {
+            $builder->addSelect($item['field']);
+            $builder->addOrderBy($item['field'], $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC');
         }
 
         return $builder;
@@ -135,7 +138,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
     protected function getCondition(string $table, array $keys, QueryBuilder $builder, ResolveInfo $info): array
     {
-        $condition = GeneralUtility::makeInstance(FilterProcessor::class, $info, $builder)->process();
+        $condition = GeneralUtility::makeInstance(FilterArgumentProcessor::class, $info, $builder)->process();
         $condition = $condition !== null ? [$condition] : [];
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
@@ -162,16 +165,14 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
     /**
      * @todo GraphQL standard compliance.
      */
-    protected function getColumns(string $table, QueryBuilder $builder, ResolveInfo $info): array
+    protected function getColumns(string $table, ResolveInfo $info): array
     {
         $columns = [];
 
         foreach ($info->fieldNodes[0]->selectionSet->selections as $selection) {
             if ($selection->kind === 'Field') {
                 $columns[] = $selection->name->value;
-            }
-
-            if ($selection->kind === 'InlineFragment' && $selection->typeCondition->name->value === $table) {
+            } else if ($selection->kind === 'InlineFragment' && $selection->typeCondition->name->value === $table) {
                 foreach ($selection->selectionSet->selections as $selection) {
                     if ($selection->kind === 'Field') {
                         $columns[] = $selection->name->value;
@@ -194,39 +195,50 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         return 'uid';
     }
 
-    protected function getForeignKeys($commaSeparatedValues): array
+    protected function getForeignKeys(string $commaSeparatedValues)
     {
-        $foreignKeys = [];
         $defaultTable = reset($this->getPropertyDefinition()->getRelationTableNames());
-        $commaSeparatedValues = array_unique($commaSeparatedValues ? explode(',', (string)$commaSeparatedValues) : []);
+        $commaSeparatedValues = array_unique($commaSeparatedValues ? explode(',', $commaSeparatedValues) : []);
 
         foreach ($commaSeparatedValues as $commaSeparatedValue) {
             $separatorPosition = strrpos($commaSeparatedValue, '_');
             $table = $separatorPosition ? substr($commaSeparatedValue, 0, $separatorPosition) : $defaultTable;
-            $foreignKeys[$table][] = substr($commaSeparatedValue, ($separatorPosition ?: -1) + 1);
-        }
+            $identifier = substr($commaSeparatedValue, ($separatorPosition ?: -1) + 1);
 
-        return $foreignKeys;
+            yield $table => $identifier;
+        }
     }
 
-    /**
-     * @todo Use the meta model.
-     */
-    protected function getOrder(string $table, array $items = []): array
+    protected function getOrderBy(array $arguments, ResolveInfo $info, string $table): Traversable
     {
-        if (empty($items)) {
-            $configuration = $GLOBALS['TCA'][$table];
-            $sortBy = $configuration['ctrl']['sortby'] ?: $configuration['ctrl']['default_sortby'];
-            $items = QueryHelper::parseOrderBy($sortBy ?? '');
-        } else {
-            $items = array_map(function($item) {
-                return [
-                    $table . '.' . $item['field'],
-                    $item['order'] === 'descending' ? 'DESC' : 'ASC'
-                ];
-            }, $items);
+        $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
+
+        OrderExpressionValidator::validate($info, $expression, $table);
+
+        return GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, $table);
+    }
+
+    protected function orderResult(array $arguments, array $rows, ResolveInfo $info, array $tables): array
+    {
+        $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
+
+        if ($expression === null) {
+            return $rows;
         }
 
-        return $items;
+        $traversable = GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, ...$tables);
+        $arguments = [];
+
+        foreach ($traversable as $item) {
+            array_push($arguments, array_map(function ($row) use ($item) {
+                return !$item['constraint'] || $row[EntitySchemaFactory::ENTITY_TYPE_FIELD] === $item['constraint']
+                    ? $row[$item['field']] : null;
+            }, $rows), $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? SORT_ASC : SORT_DESC);
+        }
+
+        array_push($arguments, $rows);
+        array_multisort(...$arguments);
+
+        return array_pop($arguments);
     }
 }

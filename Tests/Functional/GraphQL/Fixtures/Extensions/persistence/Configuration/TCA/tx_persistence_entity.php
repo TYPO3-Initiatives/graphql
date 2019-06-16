@@ -270,7 +270,7 @@ return [
                 'allowed' => 'tt_content,pages',
                 'MM' => 'tx_persistence_entity_mm',
                 'MM_match_fields' => [
-                    'fieldname' => 'relation_group_mn_mm_any'
+                    'fieldname' => 'relation_group_mn_mm_content_page'
                 ],
                 'maxitems' => 10,
                 'autoSizeMax' => 10,

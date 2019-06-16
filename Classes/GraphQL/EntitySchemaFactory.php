@@ -27,27 +27,45 @@ use TYPO3\CMS\Core\Configuration\MetaModel\EntityRelationMap;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\GraphQL\Database\EntityResolver;
 use TYPO3\CMS\Core\GraphQL\EntityRelationResolverFactory;
-use TYPO3\CMS\Core\GraphQL\Type\SortClauseType;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class EntitySchemaFactory
 {
+    const ENTITY_INTERFACE_NAME = 'Entity';
+
+    const ENTITY_QUERY_NAME = 'entities';
+
+    const FILTER_ARGUMENT_NAME = 'filter';
+
+    const ORDER_ARGUMENT_NAME = 'order';
+
+    const ENTITY_TYPE_FIELD = '__table';
+
+    /**
+     * @var array
+     */
     protected static $objectTypes = [];
 
+    /**
+     * @var array
+     */
     protected static $interfaceTypes = [];
 
     public function create(EntityRelationMap $entityRelationMap): Schema
     {
         $query = [
-            'name' => 'Query',
+            'name' => self::ENTITY_QUERY_NAME,
             'fields' => [],
         ];
 
         foreach ($entityRelationMap->getEntityDefinitions() as $entityDefinition) {
             $resolver = GeneralUtility::makeInstance(EntityResolver::class, $entityDefinition);
+            $type = Type::listOf($this->buildObjectType($entityDefinition));
+
+            $type->config['meta'] = $entityDefinition;
 
             $query['fields'][$entityDefinition->getName()] = [
-                'type' => Type::listOf($this->buildObjectType($entityDefinition)),
+                'type' => $type,
                 'args' => $resolver->getArguments(),
                 'meta' => $entityDefinition,
                 'resolve' => function($source, $arguments, $context, ResolveInfo $info) use ($resolver) {
@@ -61,27 +79,29 @@ class EntitySchemaFactory
         ]);
     }
 
-    protected function buildEntityInterfaceType() {
-        if (!array_key_exists('Entity', self::$interfaceTypes)) {
-            self::$interfaceTypes['Entity'] = new InterfaceType([
-                'name' => 'Entity',
-                'description' => 'Base type for all entites managed by TYPO3 CMS.',
+    protected function buildEntityInterfaceType(): Type
+    {
+        if (!array_key_exists(self::ENTITY_INTERFACE_NAME, self::$interfaceTypes)) {
+            self::$interfaceTypes[self::ENTITY_INTERFACE_NAME] = new InterfaceType([
+                'name' => self::ENTITY_INTERFACE_NAME,
                 'fields' => [
                     'uid' => [
                         'type' => Type::id(),
-                        'description' => 'The id of the entity.',
-                    ]
+                    ],
+                    'pid' => [
+                        'type' => Type::int(),
+                    ],
                 ],
                 'resolveType' => function ($value) {
-                    return self::$objectTypes[$value['__table']];
+                    return self::$objectTypes[$value[self::ENTITY_TYPE_FIELD]];
                 },
             ]);
         }
 
-        return self::$interfaceTypes['Entity'];
+        return self::$interfaceTypes[self::ENTITY_INTERFACE_NAME];
     }
 
-    protected function buildObjectType(EntityDefinition $entityDefinition)
+    protected function buildObjectType(EntityDefinition $entityDefinition): Type
     {
         if (array_key_exists($entityDefinition->getName(), self::$objectTypes)) {
             $objectType = self::$objectTypes[$entityDefinition->getName()];
@@ -96,7 +116,6 @@ class EntitySchemaFactory
                         $field = [
                             'name' => $propertyDefinition->getName(),
                             'type' => $this->buildFieldType($propertyDefinition),
-                            'args' => [],
                             'meta' => $propertyDefinition
                         ];
 
@@ -125,60 +144,39 @@ class EntitySchemaFactory
         return $objectType;
     }
 
+    protected function buildFieldType(PropertyDefinition $propertyDefinition): Type
+    {
+        $type = $propertyDefinition->isRelationProperty()
+            ? $this->buildCompositeFieldType($propertyDefinition) : $this->buildScalarFieldType($propertyDefinition);
+
+        $type->config['meta'] = $propertyDefinition;
+
+        return $type;
+    }
+
     /**
      * @todo Respect cardinality of relation properties
      */
-    protected function buildFieldType(PropertyDefinition $propertyDefinition)
+    protected function buildCompositeFieldType(PropertyDefinition $propertyDefinition): Type
     {
-        if ($propertyDefinition->isRelationProperty()) {
-            $activeRelations = $propertyDefinition->getActiveRelations();
+        $activeRelations = $propertyDefinition->getActiveRelations();
 
-            if (count($activeRelations) > 1) {
-                return Type::listOf($this->buildEntityInterfaceType());
-            } else if ($activeRelations[0]->getTo() instanceof PropertyDefinition) {
-                return Type::listOf($this->buildObjectType($activeRelations[0]->getTo()->getEntityDefinition()));
-            } else {
-                return Type::listOf($this->buildObjectType($activeRelations[0]->getTo()));
-            }
-        } else {
-            $scalarTypeMap = [
-                'check' => function(PropertyDefinition $propertyDefinition) {
-                    return Type::boolean();
-                },
-                'input' => function(PropertyDefinition $propertyDefinition) {
-                    // @todo render types
-                    return Type::string();
-                },
-                'text' => function(PropertyDefinition $propertyDefinition) {
-                    return Type::string();
-                },
-                'radio' => function(PropertyDefinition $propertyDefinition) {
-                    return Type::string();
-                },
-                'select' => function(PropertyDefinition $propertyDefinition) {
-                    return Type::string();
-                },
-                'passthrough' => function(PropertyDefinition $propertyDefinition) {
-                    return Type::string();
-                },
-            ];
-
-            return isset($scalarTypeMap[$propertyDefinition->getPropertyType()])
-                ? $scalarTypeMap[$propertyDefinition->getPropertyType()]($propertyDefinition) : Type::string();
+        if (count($activeRelations) > 1) {
+            return Type::listOf($this->buildEntityInterfaceType());
+        } else if ($activeRelations[0]->getTo() instanceof PropertyDefinition) {
+            return Type::listOf($this->buildObjectType($activeRelations[0]->getTo()->getEntityDefinition()));
         }
+
+        return Type::listOf($this->buildObjectType($activeRelations[0]->getTo()));
     }
 
-    protected static function buildEnumeration(PropertyDefinition $propertyDefinition)
+    protected function buildScalarFieldType(PropertyDefinition $propertyDefinition): Type
     {
-        // @todo items processing function and LLL
-        return new EnumType([
-            'name' => $propertyDefinition->getName(),
-            'values' => array_map(function($item) {
-                return [
-                    'value' => $item[1],
-                    'description' => $item[0]
-                ];
-            }, $propertyDefinition->getConfiguration()['items'])
-        ]);
+        switch ($propertyDefinition->getPropertyType()) {
+            case 'check':
+                return Type::boolean();
+            default:
+                return Type::string();
+        }
     }
 }

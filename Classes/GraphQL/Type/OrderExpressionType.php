@@ -2,8 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL\Type;
 
-use GraphQL\Type\Definition\ScalarType;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -17,14 +15,20 @@ use GraphQL\Type\Definition\ScalarType;
  * The TYPO3 project - inspiring people to share!
  */
 
-class SortClauseType extends ScalarType
+use GraphQL\Type\Definition\ScalarType;
+use TYPO3\CMS\Core\GraphQL\OrderExpressionParser;
+
+class OrderExpressionType extends ScalarType
 {
+    /**
+     * @var OrderExpressionType
+     */
     protected static $instance;
 
     public static function instance()
     {
         if (!self::$instance) {
-            self::$instance = new SortClauseType();
+            self::$instance = new OrderExpressionType();
         }
 
         return self::$instance;
@@ -37,33 +41,11 @@ class SortClauseType extends ScalarType
 
     public function parseValue($value)
     {
-        $parsed = [];
-        $items = explode(',', $value);
-
-        foreach ($items as $item) {
-            list($field, $order) = preg_split('/\s+/', trim($item));
-            $parsed[] = [
-                'field' => $field,
-                'order' => strtolower($order) ?? 'ascending'
-            ];
-        }
-
-        return $parsed;
+        return OrderExpressionParser::parse($value);
     }
 
     public function parseLiteral($valueNode, array $variables = null)
     {
-        $parsed = [];
-        $items = explode(',', $valueNode->value);
-
-        foreach ($items as $item) {
-            list($field, $order) = preg_split('/\s+/', trim($item));
-            $parsed[] = [
-                'field' => $field,
-                'order' => strtolower($order) ?? 'ascending'
-            ];
-        }
-
-        return $parsed;
+        return OrderExpressionParser::parse($valueNode->value);
     }
 }

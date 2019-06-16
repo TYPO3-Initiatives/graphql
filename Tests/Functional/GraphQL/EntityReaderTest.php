@@ -15,17 +15,18 @@ namespace TYPO3\CMS\Core\Tests\Functional\GraphQL;
  * The TYPO3 project - inspiring people to share!
  */
 
-use GraphQL\Error\Error;
+use Exception;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\GraphQL\EntityReader;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
+use TYPO3\CMS\Core\GraphQL\Exception\NotSupportedException;
+use TYPO3\CMS\Core\GraphQL\Exception\SchemaException;
 
 /**
  * Test case
  */
 class EntityReaderTest extends FunctionalTestCase
 {
-
     /**
      * @var array
      */
@@ -541,7 +542,11 @@ class EntityReaderTest extends FunctionalTestCase
                                 'title' => 'Entity 3',
                                 'relation_group_mn_csv_content_page' => [
                                     ['header' => 'Content 2'],
-                                    ['title' => 'Page 1.1']
+                                    ['title' => 'Page 1.1'],
+                                    ['header' => 'Content 3'],
+                                    ['title' => 'Page 1.2'],
+                                    ['header' => 'Content 1'],
+                                    ['title' => 'Page 1']
                                 ]
                             ],
                             [
@@ -585,7 +590,10 @@ class EntityReaderTest extends FunctionalTestCase
                                 'title' => 'Entity 3',
                                 'relation_group_mn_mm_content_page' => [
                                     ['title' => 'Page 1.2'],
-                                    ['header' => 'Content 3']
+                                    ['title' => 'Page 1'],
+                                    ['header' => 'Content 3'],
+                                    ['header' => 'Content 1'],
+                                    ['title' => 'Page 1.1']
                                 ]
                             ],
                             [
@@ -610,12 +618,12 @@ class EntityReaderTest extends FunctionalTestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function sortResultProvider()
+    public function orderResultQueryProvider()
     {
         return [
             [
                 '{
-                    tx_persistence_entity (sort: "title descending") {
+                    tx_persistence_entity (order: "title descending") {
                         title
                     }
                 }',
@@ -633,7 +641,7 @@ class EntityReaderTest extends FunctionalTestCase
             ],
             [
                 '{
-                    tx_persistence_entity (sort: "scalar_string ascending, title ascending") {
+                    tx_persistence_entity (order: "scalar_string ascending, title ascending") {
                         scalar_string,
                         title
                     }
@@ -652,9 +660,28 @@ class EntityReaderTest extends FunctionalTestCase
             ],
             [
                 '{
-                    tx_persistence_entity(sort: "title ascending") {
+                    tx_persistence_entity (order: "scalar_string on tx_persistence_entity descending, title ascending") {
+                        scalar_string,
                         title
-                        relation_select_mn_mm_content(sort: "bodytext ascending, header descending") {
+                    }
+                }',
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['scalar_string' => 'String', 'title' => 'Entity 1'],
+                            ['scalar_string' => 'String', 'title' => 'Entity 4'],
+                            ['scalar_string' => '', 'title' => 'Entity 2'],
+                            ['scalar_string' => '', 'title' => 'Entity 3'],
+                            ['scalar_string' => '', 'title' => 'Entity 5']
+                        ]
+                    ]
+                ]
+            ],
+            [
+                '{
+                    tx_persistence_entity (order: "title ascending") {
+                        title
+                        relation_select_mn_mm_content (order: "bodytext ascending, header descending") {
                             header
                             bodytext
                         }
@@ -691,15 +718,112 @@ class EntityReaderTest extends FunctionalTestCase
                         ]
                     ]
                 ]
+            ],
+            [
+                '{
+                    tx_persistence_entity {
+                        uid
+                        relation_group_mn_csv_content_page (order: "pid ascending, title on pages ascending, header on tt_content descending") {
+                            uid
+                            ... on pages {
+                                title
+                            }
+                            ... on tt_content {
+                                header
+                            }
+                        }
+                    }
+                }',
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            [
+                                'uid' => '1027',
+                                'relation_group_mn_csv_content_page' => []
+                            ],
+                            [
+                                'uid' => '1025',
+                                'relation_group_mn_csv_content_page' => []
+                            ],
+                            [
+                                'uid' => '1024',
+                                'relation_group_mn_csv_content_page' => []
+                            ],
+                            [
+                                'uid' => '1026',
+                                'relation_group_mn_csv_content_page' => [
+                                    ['uid' => '128', 'title' => 'Page 1'],
+                                    ['uid' => '514', 'header' => 'Content 3'],
+                                    ['uid' => '513', 'header' => 'Content 2'],
+                                    ['uid' => '512', 'header' => 'Content 1'],
+                                    ['uid' => '129', 'title' => 'Page 1.1'],
+                                    ['uid' => '130', 'title' => 'Page 1.2'],
+                                ]
+                            ],
+                            [
+                                'uid' => '1028',
+                                'relation_group_mn_csv_content_page' => []
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            [
+                '{
+                    tx_persistence_entity (order: "title descending") {
+                        uid
+                        relation_group_mn_mm_content_page (order: "pid ascending, title on pages ascending, header on tt_content descending") {
+                            uid
+                            ... on pages {
+                                title
+                            }
+                            ... on tt_content {
+                                header
+                            }
+                        }
+                    }
+                }',
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            [
+                                'uid' => '1028',
+                                'relation_group_mn_mm_content_page' => []
+                            ],
+                            [
+                                'uid' => '1027',
+                                'relation_group_mn_mm_content_page' => []
+                            ],
+                            [
+                                'uid' => '1026',
+                                'relation_group_mn_mm_content_page' => [
+                                    ['uid' => '128', 'title' => 'Page 1'],
+                                    ['uid' => '130', 'title' => 'Page 1.2'],
+                                    ['uid' => '129', 'title' => 'Page 1.1'],
+                                    ['uid' => '514', 'header' => 'Content 3'],
+                                    ['uid' => '512', 'header' => 'Content 1'],
+                                ]
+                            ],
+                            [
+                                'uid' => '1025',
+                                'relation_group_mn_mm_content_page' => []
+                            ],
+                            [
+                                'uid' => '1024',
+                                'relation_group_mn_mm_content_page' => []
+                            ]
+                        ]
+                    ]
+                ]
             ]
         ];
     }
 
     /**
      * @test
-     * @dataProvider sortResultProvider
+     * @dataProvider orderResultQueryProvider
      */
-    public function sortResult(string $query, array $expected)
+    public function orderResult(string $query, array $expected)
     {
         $reader = new EntityReader();
         $result = $reader->execute($query);
@@ -825,17 +949,115 @@ class EntityReaderTest extends FunctionalTestCase
 
     public function unsupportedQueryProvider()
     {
-        return [];
+        return [
+            [
+                '{
+                    tx_persistence_entity(order: "relation_select_mn_mm_content ascending") {
+                        title
+                        relation_select_mn_mm_content {
+                            header
+                        }
+                    }
+                }',
+                NotSupportedException::class,
+                1560598442
+            ],
+            [
+                '{
+                    tx_persistence_entity(order: "relation_select_mn_mm_content.header ascending") {
+                        title
+                        relation_select_mn_mm_content {
+                            header
+                        }
+                    }
+                }',
+                NotSupportedException::class,
+                1560598442
+            ],
+            [
+                '{
+                    tx_persistence_entity (order: "title on String ascending") {
+                        title
+                    }
+                }',
+                NotSupportedException::class,
+                1560598849
+            ],
+            [
+                '{
+                    tx_persistence_entity (order: "title on Entity ascending") {
+                        title
+                    }
+                }',
+                NotSupportedException::class,
+                1560648120
+            ]
+        ];
     }
 
     /**
      * @test
      * @dataProvider unsupportedQueryProvider
      */
-    public function throwUnsupported(string $query)
+    public function throwUnsupported(string $query, string $exceptionClass, int $exceptionCode)
     {
-        $this->expectException(Error::class);
-        $reader = new EntityReader();
-        $result = $reader->execute($query);
+        try {
+            $reader = new EntityReader();
+            $reader->execute($query);
+        } catch (Exception $exception) {
+            $this->assertInstanceOf($exceptionClass, $exception);
+            $this->assertEquals($exceptionCode, $exception->getCode());
+        }
+    }
+
+    public function invalidQueryProvider()
+    {
+        return [
+            [
+                '{
+                    tx_persistence_entity (order: "unknown ascending") {
+                        title
+                    }
+                }',
+                SchemaException::class,
+                1560645175
+            ],
+            [
+                '{
+                    tx_persistence_entity (order: "title on unknown ascending") {
+                        title
+                    }
+                }',
+                SchemaException::class,
+                1560598849
+            ],
+            [
+                '{
+                    tx_persistence_entity {
+                        title
+                        relation_select_mn_mm_content (order: "title on tx_persistence_entity ascending") {
+                            header
+                        }
+                    }
+                }',
+                SchemaException::class,
+                1560655028
+            ]
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider invalidQueryProvider
+     */
+    public function throwInvalid(string $query, string $exceptionClass, int $exceptionCode)
+    {
+        try {
+            $reader = new EntityReader();
+            $reader->execute($query);
+        } catch (Exception $exception) {
+            $this->assertInstanceOf($exceptionClass, $exception);
+            $this->assertEquals($exceptionCode, $exception->getCode());
+        }
     }
 }

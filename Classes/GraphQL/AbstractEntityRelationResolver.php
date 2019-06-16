@@ -2,11 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL;
 
-use GraphQL\Type\Definition\ListOfType;
-use GraphQL\Type\Definition\ResolveInfo;
-use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -20,9 +15,13 @@ use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
  * The TYPO3 project - inspiring people to share!
  */
 
+use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\GraphQL\Type\OrderExpressionType;
+
 abstract class AbstractEntityRelationResolver implements EntityRelationResolverInterface, BufferedResolverInterface
 {
-
     /**
      * @var PropertyDefinition
      */
@@ -31,6 +30,20 @@ abstract class AbstractEntityRelationResolver implements EntityRelationResolverI
     public function __construct(PropertyDefinition $propertyDefinition)
     {
         $this->propertyDefinition = $propertyDefinition;
+    }
+
+    public function getArguments(): array
+    {
+        return [
+            [
+                'name' => 'filter',
+                'type' => Type::string(),
+            ],
+            [
+                'name' => EntitySchemaFactory::ORDER_ARGUMENT_NAME,
+                'type' => OrderExpressionType::instance(),
+            ]
+        ];
     }
 
     protected function assertResolveInfoIsValid(ResolveInfo $info)

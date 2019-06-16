@@ -20,8 +20,13 @@ use TYPO3\CMS\Core\GraphQL\FilterExpressionParser;
  * The TYPO3 project - inspiring people to share!
  */
 
-class FilterProcessor
+class FilterArgumentProcessor
 {
+    /**
+     * @var string
+     */
+    public const ARGUMENT_NAME = 'filter';
+
     /**
      * @var array
      */
@@ -60,7 +65,7 @@ class FilterProcessor
         $arguments = $this->info->operation->selectionSet->selections[0]->arguments;
 
         foreach ($arguments as $argument) {
-            if ($argument->name->value === 'filter') {
+            if ($argument->name->value === self::ARGUMENT_NAME) {
                 $value = $argument->value;
                 $this->node = $value->kind === 'StringValue' ? FilterExpressionParser::parse($value->value) : $value->value;
                 break;

@@ -2,16 +2,13 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
-use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
-use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
+use Traversable;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\Database\Query\QueryHelper;
 use TYPO3\CMS\Core\GraphQL\AbstractEntityResolver;
-use TYPO3\CMS\Core\GraphQL\Database\FilterProcessor;
-use TYPO3\CMS\Core\GraphQL\Type\SortClauseType;
+use TYPO3\CMS\Core\GraphQL\Database\FilterArgumentProcessor;
+use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /*
@@ -29,21 +26,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class EntityResolver extends AbstractEntityResolver
 {
-
-    public function getArguments(): array
-    {
-        return [
-            [
-                'name' => 'filter',
-                'type' => Type::string(),
-            ],
-            [
-                'name' => 'sort',
-                'type' => SortClauseType::instance(),
-            ]
-        ];
-    }
-
     public function resolve($source, array $arguments, array $context, ResolveInfo $info): array
     {
         return $this->getBuilder($arguments, $context, $info)
@@ -61,7 +43,7 @@ class EntityResolver extends AbstractEntityResolver
         $builder->getRestrictions()
             ->removeAll();
 
-        $builder->select(...$this->getColumns($builder, $info))
+        $builder->select(...$this->getColumns($info))
             ->from($table);
 
         $condition = $this->getCondition($builder, $info);
@@ -70,10 +52,9 @@ class EntityResolver extends AbstractEntityResolver
             $builder->where(...$condition);
         }
 
-        $order = $this->getOrder((array)$arguments['sort']);
-
-        foreach ($order as $item) {
-            $builder->addOrderBy($item[0], $item[1]);
+        foreach ($this->getOrderBy($arguments, $info, $table) as $item) {
+            $builder->addSelect($item['field']);
+            $builder->addOrderBy($item['field'], $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC');
         }
 
         return $builder;
@@ -81,7 +62,7 @@ class EntityResolver extends AbstractEntityResolver
 
     protected function getCondition(QueryBuilder $builder, ResolveInfo $info): array
     {
-        $condition = GeneralUtility::makeInstance(FilterProcessor::class, $info, $builder)->process();
+        $condition = GeneralUtility::makeInstance(FilterArgumentProcessor::class, $info, $builder)->process();
         return $condition !== null ? [$condition] : [];
     }
 
@@ -90,7 +71,7 @@ class EntityResolver extends AbstractEntityResolver
         return $this->getEntityDefinition()->getName();
     }
 
-    protected function getColumns(QueryBuilder $builder, ResolveInfo $info): array
+    protected function getColumns(ResolveInfo $info): array
     {
         $columns = ['uid'];
 
@@ -103,24 +84,12 @@ class EntityResolver extends AbstractEntityResolver
         return $columns;
     }
 
-    /**
-     * @todo Use the meta model.
-     */
-    protected function getOrder(array $items = []): array
+    protected function getOrderBy(array $arguments, ResolveInfo $info, string $table): Traversable
     {
-        if (empty($items)) {
-            $configuration = $GLOBALS['TCA'][$this->getEntityDefinition()->getName()];
-            $sortBy = $configuration['ctrl']['sortby'] ?: $configuration['ctrl']['default_sortby'];
-            $items = QueryHelper::parseOrderBy($sortBy ?? '');
-        } else {
-            $items = array_map(function($item) {
-                return [
-                    $item['field'],
-                    $item['order'] === 'descending' ? 'DESC' : 'ASC'
-                ];
-            }, $items);
-        }
+        $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
 
-        return $items;
+        OrderExpressionValidator::validate($info, $expression, $table);
+
+        return GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, $table);
     }
 }

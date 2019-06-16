@@ -39,17 +39,22 @@ class PassiveOneToManyEntityRelationResolver extends AbstractPassiveEntityRelati
         return true;
     }
 
-    protected function fetchData(array $row, array $data): array
+    protected function getBufferIndexes(array $row): array
     {
-        $data = parent::fetchData($row, $data);
+        $indexes = parent::getBufferIndexes($row);
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
 
         if (isset($propertyConfiguration['config']['symmetric_field'])) {
-            $data[$row[$propertyConfiguration['config']['symmetric_field']]][] = $row;
+            $alias = $this->getColumnAlias(
+                $this->getTable(),
+                $propertyConfiguration['config']['symmetric_field']
+            );
+
+            $indexes[] = $row[$alias];
         }
 
-        return $data;
+        return $indexes;
     }
 
     protected function getTable(): string
@@ -78,26 +83,39 @@ class PassiveOneToManyEntityRelationResolver extends AbstractPassiveEntityRelati
         $condition = parent::getCondition($keys, $builder, $info);
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
+        $table = $this->getPropertyDefinition()->getEntityDefinition()->getName();
 
         if (isset($propertyConfiguration['config']['foreign_table_field'])) {
             $condition[] = $builder->expr()->eq(
-                $propertyConfiguration['config']['foreign_table_field'],
-                $builder->createNamedParameter($this->getPropertyDefinition()->getEntityDefinition()->getName())
+                $this->getColumnIdentifier(
+                    $this->getTable(),
+                    $propertyConfiguration['config']['foreign_table_field']
+                ),
+                $builder->createNamedParameter($table)
             );
 
             if (isset($propertyConfiguration['config']['symmetric_field'])) {
                 $condition[] = $builder->expr()->andX(
                     array_pop($condition),
                     $builder->expr()->eq(
-                        $propertyConfiguration['config']['symmetric_field'],
-                        $builder->createNamedParameter($this->getPropertyDefinition()->getEntityDefinition()->getName())
+                        $this->getColumnIdentifier(
+                            $this->getTable(),
+                            $propertyConfiguration['config']['symmetric_field']
+                        ),
+                        $builder->createNamedParameter($table)
                     )
                 );
             }
         }
 
         foreach ($propertyConfiguration['config']['foreign_match_fields'] ?? [] as $field => $match) {
-            $condition[] = $builder->expr()->eq($field, $builder->createNamedParameter($match));
+            $condition[] = $builder->expr()->eq(
+                $this->getColumnIdentifier(
+                    $this->getTable(),
+                    $field
+                ),
+                $builder->createNamedParameter($match)
+            );
         }
 
         return $condition;

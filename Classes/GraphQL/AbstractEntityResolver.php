@@ -2,10 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL;
 
-use GraphQL\Type\Definition\ListOfType;
-use GraphQL\Type\Definition\ResolveInfo;
-use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -19,9 +15,12 @@ use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
  * The TYPO3 project - inspiring people to share!
  */
 
+use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
+use TYPO3\CMS\Core\GraphQL\Type\OrderExpressionType;
+
 abstract class AbstractEntityResolver implements ResolverInterface
 {
-
     /**
      * @var EntityDefinition
      */
@@ -30,6 +29,20 @@ abstract class AbstractEntityResolver implements ResolverInterface
     public function __construct(EntityDefinition $entityDefinition)
     {
         $this->entityDefinition = $entityDefinition;
+    }
+
+    public function getArguments(): array
+    {
+        return [
+            [
+                'name' => 'filter',
+                'type' => Type::string(),
+            ],
+            [
+                'name' => EntitySchemaFactory::ORDER_ARGUMENT_NAME,
+                'type' => OrderExpressionType::instance(),
+            ]
+        ];
     }
 
     protected function getEntityDefinition(): EntityDefinition

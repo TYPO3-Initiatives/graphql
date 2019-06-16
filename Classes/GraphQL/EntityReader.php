@@ -17,7 +17,6 @@ namespace TYPO3\CMS\Core\GraphQL;
 
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
-use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityRelationMapFactory;

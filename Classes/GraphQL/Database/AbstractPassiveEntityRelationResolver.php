@@ -2,21 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
-use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
-use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
-use TYPO3\CMS\Core\Configuration\MetaModel\ActiveEntityRelation;
-use TYPO3\CMS\Core\Configuration\MetaModel\ActivePropertyRelation;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-use TYPO3\CMS\Core\Database\Connection;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\Database\Query\QueryHelper;
-use TYPO3\CMS\Core\GraphQL\AbstractEntityRelationResolver;
-use TYPO3\CMS\Core\GraphQL\Type\SortClauseType;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Webmozart\Assert\Assert;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -30,22 +15,20 @@ use Webmozart\Assert\Assert;
  * The TYPO3 project - inspiring people to share!
  */
 
+use GraphQL\Type\Definition\ResolveInfo;
+use Traversable;
+use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
+use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\GraphQL\AbstractEntityRelationResolver;
+use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Webmozart\Assert\Assert;
+
 abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelationResolver
 {
-    public function getArguments(): array
-    {
-        return [
-            [
-                'name' => 'filter',
-                'type' => Type::string(),
-            ],
-            [
-                'name' => 'sort',
-                'type' => SortClauseType::instance(),
-            ]
-        ];
-    }
-
     public function collect($source, array $arguments, array $context, ResolveInfo $info)
     {
         Assert::keyExists($context, 'cache');
@@ -67,23 +50,25 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
 
-        $cacheIdentifier = $this->getCacheIdentifier('data');
-        $data = $context['cache']->get($cacheIdentifier) ?: [];
+        $cacheIdentifier = $this->getCacheIdentifier('buffer');
+        $buffer = $context['cache']->get($cacheIdentifier) ?: [];
 
         if (!$context['cache']->has($cacheIdentifier)) {
             $builder = $this->getBuilder($arguments, $context, $info);
             $statement = $builder->execute();
 
             while ($row = $statement->fetch()) {
-                $row['__table'] = $this->getType($row);
+                $row = $this->transformRow($row);
 
-                $data = $this->fetchData($row, $data);
+                foreach ($this->getBufferIndexes($row) as $index) {
+                    $buffer[$index][] = $row;
+                }
             }
 
-            $context['cache']->set($cacheIdentifier, $data);
+            $context['cache']->set($cacheIdentifier, $buffer);
         }
 
-        return $data[$source['uid']] ?? [];
+        return $buffer[$source['uid']] ?? [];
     }
 
     protected abstract function getType(array $source): string;
@@ -97,10 +82,50 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         return \spl_object_hash($this) . '_' . $identifier;
     }
 
-    protected function fetchData(array $row, array $data): array
+    protected function getColumnIdentifier(string $table, string $column): string
     {
-        $data[$row[$this->getForeignKeyField()]][] = $row;
-        return $data;
+        return sprintf('%s.%s', $table, $column);
+    }
+
+    protected function getColumnAlias(string $table, string $column): string
+    {
+        return sprintf('%s_%s', $table, $column);
+    }
+
+    protected function getColumnIdentifierForSelect(string $table, string $column): string
+    {
+        return sprintf(
+            '%s AS %s',
+            $this->getColumnIdentifier($table, $column),
+            $this->getColumnAlias($table, $column)
+        );
+    }
+
+    protected function transformRow(array $row): array
+    {
+        $type = $this->getType($row);
+
+        foreach ($row as $field => $value) {
+            if (strpos($field, $type) === 0) {
+                $row[substr($field, strlen($type) + 1)] = $value;
+            }
+        }
+
+        $row[EntitySchemaFactory::ENTITY_TYPE_FIELD] = $type;
+
+        return $row;
+    }
+
+    protected function getBufferIndexes(array $row): array
+    {
+        $alias = $this->getColumnAlias(
+            $this->getTable(),
+            $this->getForeignKeyField()
+        );
+
+        return [
+            $row[$alias]
+        ];
     }
 
     protected function getBuilder(array $arguments, array $context, ResolveInfo $info)
@@ -113,7 +138,7 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         $builder->getRestrictions()
             ->removeAll();
 
-        $builder->select(...$this->getColumns($builder, $info))
+        $builder->select(...$this->getColumns($info))
             ->from($table);
 
         $condition = $this->getCondition($keys, $builder, $info);
@@ -122,10 +147,14 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
             $builder->where(...$condition);
         }
 
-        $order = $this->getOrder((array)$arguments['sort']);
-
-        foreach ($order as $item) {
-            $builder->addOrderBy($item[0], $item[1]);
+        foreach ($this->getOrderBy($arguments, $info, $table) as $item) {
+            $builder->addSelect(
+                $this->getColumnIdentifierForSelect($item['constraint'] ?? $table, $item['field'])
+            );
+            $builder->addOrderBy(
+                $this->getColumnIdentifier($item['constraint'] ?? $table, $item['field']),
+                 $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC'
+            );
         }
 
         return $builder;
@@ -133,64 +162,62 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
 
     protected function getCondition(array $keys, QueryBuilder $builder, ResolveInfo $info)
     {
-        $condition = GeneralUtility::makeInstance(FilterProcessor::class, $info, $builder)->process();
+        $condition = GeneralUtility::makeInstance(FilterArgumentProcessor::class, $info, $builder)->process();
         $condition = $condition !== null ? [$condition] : [];
 
-        $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
-
         $condition[] = $builder->expr()->in(
-            $this->getForeignKeyField(),
+            $this->getColumnIdentifier(
+                $this->getTable(),
+                $this->getForeignKeyField()
+            ),
             $builder->createNamedParameter($keys, Connection::PARAM_INT_ARRAY)
         );
 
         return $condition;
     }
 
-    protected function getColumns(QueryBuilder $builder, ResolveInfo $info)
+    protected function getColumns(ResolveInfo $info)
     {
+        $activeRelations = $info->returnType->config['meta']->getActiveRelations();
         $columns = [];
 
         foreach ($info->fieldNodes[0]->selectionSet->selections as $selection) {
             if ($selection->kind === 'Field') {
-                $columns[] = $selection->name->value;
-            }
-
-            if ($selection->kind === 'InlineFragment') {
+                foreach ($activeRelations as $activeRelation) {
+                    $columns[] = $this->getColumnIdentifierForSelect(
+                        $activeRelation->getTo() instanceof EntityDefinition
+                            ? $activeRelation->getTo()->getName() : $activeRelation->getTo()->getEntityDefinition()->getName(),
+                        $selection->name->value
+                    );
+                }
+            } else if ($selection->kind === 'InlineFragment') {
                 foreach ($selection->selectionSet->selections as $inlineSelection) {
-                    if ($inlineSelection->kind === 'Field') {
-                        $columns[] = $selection->typeCondition->name->value . '.' . $inlineSelection->name->value;
+                    if ($inlineSelection->kind !== 'Field') {
+                        continue;
                     }
+
+                    $columns[] = $this->getColumnIdentifierForSelect(
+                        $selection->typeCondition->name->value,
+                        $inlineSelection->name->value
+                    );
                 }
             }
         }
 
-        $foreignKeyField = $this->getForeignKeyField();
-
-        if ($foreignKeyField) {
-            $columns[] = $foreignKeyField;
-        }
+        $columns[] = $this->getColumnIdentifierForSelect(
+            $this->getTable(),
+            $this->getForeignKeyField()
+        );
 
         return $columns;
     }
 
-    /**
-     * @todo Use the meta model.
-     */
-    protected function getOrder(array $items = []): array
+    protected function getOrderBy(array $arguments, ResolveInfo $info, string $table): Traversable
     {
-        if (empty($items)) {
-            $configuration = $GLOBALS['TCA'][$this->getTable()];
-            $sortBy = $configuration['ctrl']['sortby'] ?: $configuration['ctrl']['default_sortby'];
-            $items = QueryHelper::parseOrderBy($sortBy ?? '');
-        } else {
-            $items = array_map(function($item) {
-                return [
-                    $item['field'],
-                    $item['order'] === 'descending' ? 'DESC' : 'ASC'
-                ];
-            }, $items);
-        }
+        $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
 
-        return $items;
+        OrderExpressionValidator::validate($info, $expression, $table);
+
+        return GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, $table);
     }
 }
