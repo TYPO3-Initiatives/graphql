@@ -2,11 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL;
 
-use Hoa\Compiler\Llk\Llk;
-use Hoa\Compiler\Llk\TreeNode;
-use Hoa\File\Read;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -19,6 +14,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use Hoa\Compiler\Llk\Llk;
+use Hoa\Compiler\Llk\TreeNode;
+use Hoa\File\Read;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class FilterExpressionParser
 {

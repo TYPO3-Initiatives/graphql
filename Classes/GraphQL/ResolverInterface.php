@@ -2,8 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL;
 
-use GraphQL\Type\Definition\ResolveInfo;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -16,6 +14,8 @@ use GraphQL\Type\Definition\ResolveInfo;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use GraphQL\Type\Definition\ResolveInfo;
 
 interface ResolverInterface
 {

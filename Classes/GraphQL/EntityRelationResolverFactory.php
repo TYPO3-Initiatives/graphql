@@ -2,12 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL;
 
-use GraphQL\Type\Definition\ListOfType;
-use GraphQL\Type\Definition\ResolveInfo;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-use TYPO3\CMS\Core\SingletonInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -20,6 +14,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class EntityRelationResolverFactory implements SingletonInterface
 {

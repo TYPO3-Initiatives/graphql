@@ -2,12 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
-use GraphQL\Type\Definition\ResolveInfo;
-use TYPO3\CMS\Core\Configuration\MetaModel\ActivePropertyRelation;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use Webmozart\Assert\Assert;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -20,6 +14,12 @@ use Webmozart\Assert\Assert;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use GraphQL\Type\Definition\ResolveInfo;
+use TYPO3\CMS\Core\Configuration\MetaModel\ActivePropertyRelation;
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use Webmozart\Assert\Assert;
 
 class PassiveOneToManyEntityRelationResolver extends AbstractPassiveEntityRelationResolver
 {

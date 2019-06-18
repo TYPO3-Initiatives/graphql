@@ -16,7 +16,6 @@ namespace TYPO3\CMS\Core\GraphQL;
  */
 
 use GraphQL\Deferred;
-use GraphQL\Type\Definition\EnumType;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;

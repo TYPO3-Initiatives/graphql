@@ -2,9 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL;
 
-use GraphQL\Type\Definition\ResolveInfo;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -17,6 +14,8 @@ use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 
 interface EntityRelationResolverInterface extends ResolverInterface
 {

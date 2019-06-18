@@ -2,15 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
-use GraphQL\Type\Definition\ResolveInfo;
-use Traversable;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\GraphQL\AbstractEntityResolver;
-use TYPO3\CMS\Core\GraphQL\Database\FilterArgumentProcessor;
-use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -23,6 +14,15 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use GraphQL\Type\Definition\ResolveInfo;
+use Traversable;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\GraphQL\AbstractEntityResolver;
+use TYPO3\CMS\Core\GraphQL\Database\FilterArgumentProcessor;
+use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class EntityResolver extends AbstractEntityResolver
 {

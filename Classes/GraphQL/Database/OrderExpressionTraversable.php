@@ -2,18 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
-use Generator;
-use Hoa\Compiler\Llk\TreeNode;
-use IteratorAggregate;
-use TYPO3\CMS\Core\Database\Query\QueryHelper;
-use TYPO3\CMS\Core\GraphQL\Exception\NotSupportedException;
-use TYPO3\CMS\Core\GraphQL\Exception\SchemaException;
-use Webmozart\Assert\Assert;
-use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
-use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -26,6 +14,14 @@ use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use Hoa\Compiler\Llk\TreeNode;
+use IteratorAggregate;
+use TYPO3\CMS\Core\Database\Query\QueryHelper;
+use Webmozart\Assert\Assert;
+use GraphQL\Type\Definition\ResolveInfo;
+use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 
 class OrderExpressionTraversable implements IteratorAggregate
 {

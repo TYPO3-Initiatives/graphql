@@ -2,14 +2,6 @@
 declare(strict_types = 1);
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
-use EmptyIterator;
-use GraphQL\Type\Definition\ResolveInfo;
-use Traversable;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
-use Webmozart\Assert\Assert;
-
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -22,6 +14,14 @@ use Webmozart\Assert\Assert;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use EmptyIterator;
+use GraphQL\Type\Definition\ResolveInfo;
+use Traversable;
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
+use Webmozart\Assert\Assert;
 
 class PassiveManyToManyEntityRelationResolver extends AbstractPassiveEntityRelationResolver
 {
