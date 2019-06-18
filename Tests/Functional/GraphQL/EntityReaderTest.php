@@ -835,7 +835,7 @@ class EntityReaderTest extends FunctionalTestCase
         return [
             [
                 '{
-                    tx_persistence_entity(filter: "scalar_string = `String`") {
+                    tx_persistence_entity (filter: "scalar_string = `String`") {
                         uid
                     }
                 }',
@@ -851,7 +851,7 @@ class EntityReaderTest extends FunctionalTestCase
             ],
             [
                 '{
-                    tx_persistence_entity(filter: "not uid = 1026") {
+                    tx_persistence_entity (filter: "not uid = 1026") {
                         uid
                     }
                 }',
@@ -869,7 +869,7 @@ class EntityReaderTest extends FunctionalTestCase
             ],
             [
                 '{
-                    tx_persistence_entity(filter: "scalar_float = 3.1415 or scalar_integer = 1") {
+                    tx_persistence_entity (filter: "scalar_float = 3.1415 or scalar_integer = 1") {
                         uid
                     }
                 }',
@@ -886,7 +886,7 @@ class EntityReaderTest extends FunctionalTestCase
             ],
             [
                 '{
-                    tx_persistence_entity(filter: "scalar_float = -3.1415 or scalar_float = 3.1415 and l10n_state = null") {
+                    tx_persistence_entity (filter: "scalar_float = -3.1415 or scalar_float = 3.1415 and l10n_state = null") {
                         uid
                     }
                 }',
@@ -902,7 +902,7 @@ class EntityReaderTest extends FunctionalTestCase
             ],
             [
                 '{
-                    tx_persistence_entity(filter: "scalar_text = `` and not (scalar_float = -3.1415 or scalar_integer = null)") {
+                    tx_persistence_entity (filter: "scalar_text = `` and not (scalar_float = -3.1415 or scalar_integer = null)") {
                         uid
                     }
                 }',
@@ -952,7 +952,7 @@ class EntityReaderTest extends FunctionalTestCase
         return [
             [
                 '{
-                    tx_persistence_entity(order: "relation_select_mn_mm_content ascending") {
+                    tx_persistence_entity (order: "relation_select_mn_mm_content ascending") {
                         title
                         relation_select_mn_mm_content {
                             header
@@ -964,7 +964,7 @@ class EntityReaderTest extends FunctionalTestCase
             ],
             [
                 '{
-                    tx_persistence_entity(order: "relation_select_mn_mm_content.header ascending") {
+                    tx_persistence_entity (order: "relation_select_mn_mm_content.header ascending") {
                         title
                         relation_select_mn_mm_content {
                             header
