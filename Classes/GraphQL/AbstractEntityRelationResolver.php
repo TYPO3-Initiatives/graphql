@@ -16,8 +16,8 @@ namespace TYPO3\CMS\Core\GraphQL;
  */
 
 use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\GraphQL\Type\FilterExpressionType;
 use TYPO3\CMS\Core\GraphQL\Type\OrderExpressionType;
 
 abstract class AbstractEntityRelationResolver implements EntityRelationResolverInterface, BufferedResolverInterface
@@ -36,8 +36,8 @@ abstract class AbstractEntityRelationResolver implements EntityRelationResolverI
     {
         return [
             [
-                'name' => 'filter',
-                'type' => Type::string(),
+                'name' => EntitySchemaFactory::FILTER_ARGUMENT_NAME,
+                'type' => FilterExpressionType::instance(),
             ],
             [
                 'name' => EntitySchemaFactory::ORDER_ARGUMENT_NAME,

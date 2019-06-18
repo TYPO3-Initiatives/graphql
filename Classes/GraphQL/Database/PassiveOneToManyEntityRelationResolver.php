@@ -78,9 +78,9 @@ class PassiveOneToManyEntityRelationResolver extends AbstractPassiveEntityRelati
         return $activeRelation->getTo()->getName();
     }
 
-    protected function getCondition(array $keys, QueryBuilder $builder, ResolveInfo $info): array
+    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder, array $keys): array
     {
-        $condition = parent::getCondition($keys, $builder, $info);
+        $condition = parent::getCondition($arguments, $info, $builder, $keys);
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
         $table = $this->getPropertyDefinition()->getEntityDefinition()->getName();

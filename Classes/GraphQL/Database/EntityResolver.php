@@ -20,7 +20,7 @@ use Traversable;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\GraphQL\AbstractEntityResolver;
-use TYPO3\CMS\Core\GraphQL\Database\FilterArgumentProcessor;
+use TYPO3\CMS\Core\GraphQL\Database\FilterExpressionProcessor;
 use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -28,14 +28,14 @@ class EntityResolver extends AbstractEntityResolver
 {
     public function resolve($source, array $arguments, array $context, ResolveInfo $info): array
     {
-        return $this->getBuilder($arguments, $context, $info)
+        return $this->getBuilder($arguments, $info)
             ->execute()
             ->fetchAll();
     }
 
-    protected function getBuilder(array $arguments, array $context, ResolveInfo $info): QueryBuilder
+    protected function getBuilder(array $arguments, ResolveInfo $info): QueryBuilder
     {
-        $table = $this->getTable($info);
+        $table = $this->getTable();
 
         $builder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable($table);
@@ -46,7 +46,7 @@ class EntityResolver extends AbstractEntityResolver
         $builder->select(...$this->getColumns($info))
             ->from($table);
 
-        $condition = $this->getCondition($builder, $info);
+        $condition = $this->getCondition($arguments, $info, $builder);
 
         if (!empty($condition)) {
             $builder->where(...$condition);
@@ -60,13 +60,16 @@ class EntityResolver extends AbstractEntityResolver
         return $builder;
     }
 
-    protected function getCondition(QueryBuilder $builder, ResolveInfo $info): array
+    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder): array
     {
-        $condition = GeneralUtility::makeInstance(FilterArgumentProcessor::class, $info, $builder)->process();
+        $expression = $arguments[EntitySchemaFactory::FILTER_ARGUMENT_NAME] ?? null;
+
+        $condition = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder)->process();
+
         return $condition !== null ? [$condition] : [];
     }
 
-    protected function getTable(ResolveInfo $info): string
+    protected function getTable(): string
     {
         return $this->getEntityDefinition()->getName();
     }

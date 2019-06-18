@@ -50,8 +50,8 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
 
-        $cacheIdentifier = $this->getCacheIdentifier('keys');
-        $keys = $context['cache']->get($cacheIdentifier) ?: [];
+        $keysIdentifier = $this->getCacheIdentifier('keys');
+        $keys = $context['cache']->get($keysIdentifier) ?: [];
 
         if ($source !== null) {
             Assert::keyExists($source, $this->getPropertyDefinition()->getName());
@@ -65,7 +65,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
             }
         }
 
-        $context['cache']->set($cacheIdentifier, $keys);
+        $context['cache']->set($keysIdentifier, $keys);
     }
 
     public function resolve($source, array $arguments, array $context, ResolveInfo $info): array
@@ -74,16 +74,20 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
 
-        $cacheIdentifier = $this->getCacheIdentifier('buffer');
-        $buffer = $context['cache']->get($cacheIdentifier) ?: [];
+        $bufferIdentifier = $this->getCacheIdentifier('buffer');
+        $buffer = $context['cache']->get($bufferIdentifier) ?: [];
+
+        $keysIdentifier = $this->getCacheIdentifier('keys');
+        $keys = $context['cache']->get($keysIdentifier) ?: [];
+
         $result = [];
         $tables = [];
 
-        if (!$context['cache']->has($cacheIdentifier)) {
+        if (!$context['cache']->has($bufferIdentifier)) {
             $foreignKeyField = $this->getForeignKeyField();
 
             foreach ($this->getPropertyDefinition()->getRelationTableNames() as $table) {
-                $builder = $this->getBuilder($table, $arguments, $context, $info);
+                $builder = $this->getBuilder($arguments, $info, $table, $keys);
                 $statement = $builder->execute();
 
                 while ($row = $statement->fetch()) {
@@ -92,7 +96,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
                 }
             }
 
-            $context['cache']->set($cacheIdentifier, $buffer);
+            $context['cache']->set($bufferIdentifier, $buffer);
         }
 
         foreach ($this->getForeignKeys((string)$source[$this->getPropertyDefinition()->getName()]) as $table => $identifier) {
@@ -100,7 +104,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
             $result[] = $buffer[$table][$identifier];
         }
 
-        $result = $this->orderResult($arguments, $result, $info, array_keys($tables));
+        $result = $this->orderResult($arguments, $info, array_keys($tables), $result);
 
         return $result;
     }
@@ -110,19 +114,18 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         return \spl_object_hash($this) . '_' . $identifier;
     }
 
-    protected function getBuilder(string $table, array $arguments, array $context, ResolveInfo $info): QueryBuilder
+    protected function getBuilder(array $arguments, ResolveInfo $info, string $table, array $keys): QueryBuilder
     {
-        $keys = $context['cache']->get($this->getCacheIdentifier('keys')) ?? [];
         $builder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable($table);
 
         $builder->getRestrictions()
             ->removeAll();
 
-        $builder->select(...$this->getColumns($table, $info))
+        $builder->select(...$this->getColumns($info, $table))
             ->from($table);
 
-        $condition = $this->getCondition($table, $keys, $builder, $info);
+        $condition = $this->getCondition($arguments, $info, $builder, $table, $keys);
 
         if (!empty($condition)) {
             $builder->where(...$condition);
@@ -136,9 +139,11 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         return $builder;
     }
 
-    protected function getCondition(string $table, array $keys, QueryBuilder $builder, ResolveInfo $info): array
+    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder, string $table, array $keys): array
     {
-        $condition = GeneralUtility::makeInstance(FilterArgumentProcessor::class, $info, $builder)->process();
+        $expression = $arguments[EntitySchemaFactory::FILTER_ARGUMENT_NAME] ?? null;
+
+        $condition = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder)->process();
         $condition = $condition !== null ? [$condition] : [];
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
@@ -165,7 +170,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
     /**
      * @todo GraphQL standard compliance.
      */
-    protected function getColumns(string $table, ResolveInfo $info): array
+    protected function getColumns(ResolveInfo $info, string $table): array
     {
         $columns = [];
 
@@ -218,7 +223,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         return GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, $table);
     }
 
-    protected function orderResult(array $arguments, array $rows, ResolveInfo $info, array $tables): array
+    protected function orderResult(array $arguments, ResolveInfo $info, array $tables, array $rows): array
     {
         $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
 

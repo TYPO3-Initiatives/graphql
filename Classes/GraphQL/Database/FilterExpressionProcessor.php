@@ -18,15 +18,9 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
 use GraphQL\Type\Definition\ResolveInfo;
 use Hoa\Compiler\Llk\TreeNode;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\GraphQL\FilterExpressionParser;
 
-class FilterArgumentProcessor
+class FilterExpressionProcessor
 {
-    /**
-     * @var string
-     */
-    public const ARGUMENT_NAME = 'filter';
-
     /**
      * @var array
      */
@@ -45,37 +39,28 @@ class FilterArgumentProcessor
     /**
      * @var ResolveInfo
      */
-    protected $info = null;
+    protected $info;
 
     /**
      * @var QueryBuilder
      */
-    protected $builder = null;
+    protected $builder;
 
     /**
      * @var TreeNode
      */
-    protected $node = null;
+    protected $expression;
 
-    public function __construct(ResolveInfo $info, QueryBuilder $builder)
+    public function __construct(ResolveInfo $info, ?TreeNode $expression, QueryBuilder $builder)
     {
         $this->info = $info;
         $this->builder = $builder;
-
-        $arguments = $this->info->operation->selectionSet->selections[0]->arguments;
-
-        foreach ($arguments as $argument) {
-            if ($argument->name->value === self::ARGUMENT_NAME) {
-                $value = $argument->value;
-                $this->node = $value->kind === 'StringValue' ? FilterExpressionParser::parse($value->value) : $value->value;
-                break;
-            }
-        }
+        $this->expression = $expression;
     }
 
     public function process()
     {
-        return $this->node !== null ? $this->processNode($this->node->getChild(0)) : null;
+        return $this->expression !== null ? $this->processNode($this->expression->getChild(0)) : null;
     }
 
     /**
@@ -143,11 +128,6 @@ class FilterArgumentProcessor
     protected function processNone(TreeNode $node)
     {
         return 'NULL';
-    }
-
-    protected function processParameter(TreeNode $node)
-    {
-        // ...
     }
 
     protected function isBinaryLogicalOperation(TreeNode $node)

@@ -47,9 +47,9 @@ class PassiveManyToManyEntityRelationResolver extends AbstractPassiveEntityRelat
         return 'uid_local';
     }
 
-    protected function getBuilder(array $arguments, array $context, ResolveInfo $info): QueryBuilder
+    protected function getBuilder(array $arguments, ResolveInfo $info, array $keys): QueryBuilder
     {
-        $builder = parent::getBuilder($arguments, $context, $info);
+        $builder = parent::getBuilder($arguments, $info, $keys);
         $tables = $this->getPropertyDefinition()->getRelationTableNames();
         $associativeTable = $this->getTable();
 
@@ -101,9 +101,9 @@ class PassiveManyToManyEntityRelationResolver extends AbstractPassiveEntityRelat
         return $builder;
     }
 
-    protected function getCondition(array $keys, QueryBuilder $builder, ResolveInfo $info): array
+    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder, array $keys): array
     {
-        $condition = parent::getCondition($keys, $builder, $info);
+        $condition = parent::getCondition($arguments, $info, $builder, $keys);
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
         $table = $this->getTable();
@@ -132,9 +132,10 @@ class PassiveManyToManyEntityRelationResolver extends AbstractPassiveEntityRelat
         return $columns;
     }
 
-    protected function getOrderBy(array $arguments, ResolveInfo $info, string $table): Traversable
+    protected function getOrderBy(array $arguments, ResolveInfo $info, string ...$tables): Traversable
     {
         // do not apply order on the association table
-        return $table === $this->getTable() ? new EmptyIterator() : parent::getOrderBy($arguments, $info, $table);
+        return count($tables) === 1 && $tables[0] === $this->getTable()
+            ? new EmptyIterator() : parent::getOrderBy($arguments, $info, ...$tables);
     }
 }

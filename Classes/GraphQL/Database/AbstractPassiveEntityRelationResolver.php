@@ -34,15 +34,15 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
 
-        $cacheIdentifier = $this->getCacheIdentifier('keys');
-        $keys = $context['cache']->get($cacheIdentifier) ?: [];
+        $keysIdentifier = $this->getCacheIdentifier('keys');
+        $keys = $context['cache']->get($keysIdentifier) ?: [];
 
         if ($source !== null) {
             Assert::keyExists($source, 'uid');
             $keys[] = $source['uid'];
         }
 
-        $context['cache']->set($cacheIdentifier, $keys);
+        $context['cache']->set($keysIdentifier, $keys);
     }
 
     public function resolve($source, array $arguments, array $context, ResolveInfo $info): array
@@ -50,11 +50,14 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
 
-        $cacheIdentifier = $this->getCacheIdentifier('buffer');
-        $buffer = $context['cache']->get($cacheIdentifier) ?: [];
+        $bufferIdentifier = $this->getCacheIdentifier('buffer');
+        $buffer = $context['cache']->get($bufferIdentifier) ?: [];
 
-        if (!$context['cache']->has($cacheIdentifier)) {
-            $builder = $this->getBuilder($arguments, $context, $info);
+        $keysIdentifier = $this->getCacheIdentifier('keys');
+        $keys = $context['cache']->get($keysIdentifier) ?? [];
+
+        if (!$context['cache']->has($bufferIdentifier)) {
+            $builder = $this->getBuilder($arguments, $info, $keys);
             $statement = $builder->execute();
 
             while ($row = $statement->fetch()) {
@@ -65,7 +68,7 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
                 }
             }
 
-            $context['cache']->set($cacheIdentifier, $buffer);
+            $context['cache']->set($bufferIdentifier, $buffer);
         }
 
         return $buffer[$source['uid']] ?? [];
@@ -128,10 +131,9 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         ];
     }
 
-    protected function getBuilder(array $arguments, array $context, ResolveInfo $info)
+    protected function getBuilder(array $arguments, ResolveInfo $info, array $keys)
     {
         $table = $this->getTable();
-        $keys = $context['cache']->get($this->getCacheIdentifier('keys')) ?? [];
         $builder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable($table);
 
@@ -141,7 +143,7 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         $builder->select(...$this->getColumns($info))
             ->from($table);
 
-        $condition = $this->getCondition($keys, $builder, $info);
+        $condition = $this->getCondition($arguments, $info, $builder, $keys);
 
         if (!empty($condition)) {
             $builder->where(...$condition);
@@ -160,9 +162,11 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         return $builder;
     }
 
-    protected function getCondition(array $keys, QueryBuilder $builder, ResolveInfo $info)
+    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder, array $keys)
     {
-        $condition = GeneralUtility::makeInstance(FilterArgumentProcessor::class, $info, $builder)->process();
+        $expression = $arguments[EntitySchemaFactory::FILTER_ARGUMENT_NAME] ?? null;
+
+        $condition = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder)->process();
         $condition = $condition !== null ? [$condition] : [];
 
         $condition[] = $builder->expr()->in(
@@ -212,12 +216,12 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         return $columns;
     }
 
-    protected function getOrderBy(array $arguments, ResolveInfo $info, string $table): Traversable
+    protected function getOrderBy(array $arguments, ResolveInfo $info, string ...$tables): Traversable
     {
         $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
 
-        OrderExpressionValidator::validate($info, $expression, $table);
+        OrderExpressionValidator::validate($info, $expression, ...$tables);
 
-        return GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, $table);
+        return GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, ...$tables);
     }
 }

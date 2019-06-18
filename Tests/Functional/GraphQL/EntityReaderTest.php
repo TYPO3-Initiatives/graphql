@@ -798,8 +798,8 @@ class EntityReaderTest extends FunctionalTestCase
                                 'uid' => '1026',
                                 'relation_group_mn_mm_content_page' => [
                                     ['uid' => '128', 'title' => 'Page 1'],
-                                    ['uid' => '130', 'title' => 'Page 1.2'],
                                     ['uid' => '129', 'title' => 'Page 1.1'],
+                                    ['uid' => '130', 'title' => 'Page 1.2'],
                                     ['uid' => '514', 'header' => 'Content 3'],
                                     ['uid' => '512', 'header' => 'Content 1'],
                                 ]
