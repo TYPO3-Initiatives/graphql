@@ -4,7 +4,7 @@
 [![Coverage](https://img.shields.io/codacy/coverage/052bb2cd84cb461a92b172c1953989b4/master.svg)](https://app.codacy.com/project/TYPO3-Initiatives/graphql/dashboard)
 [![Code Quality](https://img.shields.io/codacy/grade/052bb2cd84cb461a92b172c1953989b4/master.svg)](https://app.codacy.com/project/TYPO3-Initiatives/graphql/dashboard)
 
-This extension integrates GraphQL into TYPO3 CMS. Currently it provides read an API for managed tables. For more information about the planned features see the [draft](https://docs.google.com/document/d/1M-V9H9W_tmWZI-Be9Zo5xTZUMgwJk2dMUxOFw-waO04/).
+This extension integrates GraphQL into TYPO3 CMS. Currently it provides an read API for managed tables. For more information about the planned features see the [draft](https://docs.google.com/document/d/1M-V9H9W_tmWZI-Be9Zo5xTZUMgwJk2dMUxOFw-waO04/).
 
 *This implementation is a proof-of-concept prototype and thus experimental development. Since not all planned features are implemented, this extension should not be used for production sites.*
 
