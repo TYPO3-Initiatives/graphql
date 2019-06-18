@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL;
 
 /*
@@ -41,7 +42,7 @@ abstract class AbstractEntityResolver implements ResolverInterface
             [
                 'name' => EntitySchemaFactory::ORDER_ARGUMENT_NAME,
                 'type' => OrderExpressionType::instance(),
-            ]
+            ],
         ];
     }
 

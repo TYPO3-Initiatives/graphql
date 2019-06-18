@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL;
 
 /*
@@ -67,9 +68,9 @@ class EntitySchemaFactory
                 'type' => $type,
                 'args' => $resolver->getArguments(),
                 'meta' => $entityDefinition,
-                'resolve' => function($source, $arguments, $context, ResolveInfo $info) use ($resolver) {
+                'resolve' => function ($source, $arguments, $context, ResolveInfo $info) use ($resolver) {
                     return $resolver->resolve($source, $arguments, $context, $info);
-                }
+                },
             ];
         }
 
@@ -108,24 +109,28 @@ class EntitySchemaFactory
             $objectType = new ObjectType([
                 'name' => $entityDefinition->getName(),
                 'interfaces' => [
-                    $this->buildEntityInterfaceType()
+                    $this->buildEntityInterfaceType(),
                 ],
-                'fields' => function() use($entityDefinition) {
-                    return array_map(function($propertyDefinition) {
+                'fields' => function () use ($entityDefinition) {
+                    return array_map(function ($propertyDefinition) {
                         $field = [
                             'name' => $propertyDefinition->getName(),
                             'type' => $this->buildFieldType($propertyDefinition),
-                            'meta' => $propertyDefinition
+                            'meta' => $propertyDefinition,
                         ];
 
-                        if ($propertyDefinition->isRelationProperty() && !$propertyDefinition->isLanguageRelationProperty()) {
-                            $resolver = GeneralUtility::makeInstance(EntityRelationResolverFactory::class)->create($propertyDefinition);
+                        if (
+                            $propertyDefinition->isRelationProperty() &&
+                            !$propertyDefinition->isLanguageRelationProperty()
+                        ) {
+                            $factory = GeneralUtility::makeInstance(EntityRelationResolverFactory::class);
+                            $resolver = $factory->create($propertyDefinition);
 
                             $field['args'] = $resolver->getArguments();
-                            $field['resolve'] = function($source, $arguments, $context, ResolveInfo $info) use ($resolver) {
+                            $field['resolve'] = function ($source, $arguments, $context, $info) use ($resolver) {
                                 $resolver->collect($source, $arguments, $context, $info);
 
-                                return new Deferred(function() use ($resolver, $source, $arguments, $context, $info) {
+                                return new Deferred(function () use ($resolver, $source, $arguments, $context, $info) {
                                     return $resolver->resolve($source, $arguments, $context, $info);
                                 });
                             };

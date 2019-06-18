@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
 /*
@@ -54,7 +55,10 @@ class EntityResolver extends AbstractEntityResolver
 
         foreach ($this->getOrderBy($arguments, $info, $table) as $item) {
             $builder->addSelect($item['field']);
-            $builder->addOrderBy($item['field'], $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC');
+            $builder->addOrderBy(
+                $item['field'],
+                $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC'
+            );
         }
 
         return $builder;
@@ -63,8 +67,9 @@ class EntityResolver extends AbstractEntityResolver
     protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder): array
     {
         $expression = $arguments[EntitySchemaFactory::FILTER_ARGUMENT_NAME] ?? null;
+        $processor = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder);
 
-        $condition = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder)->process();
+        $condition = $processor->process();
 
         return $condition !== null ? [$condition] : [];
     }

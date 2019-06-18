@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL;
 
 /*
@@ -42,14 +43,17 @@ abstract class AbstractEntityRelationResolver implements EntityRelationResolverI
             [
                 'name' => EntitySchemaFactory::ORDER_ARGUMENT_NAME,
                 'type' => OrderExpressionType::instance(),
-            ]
+            ],
         ];
     }
 
     protected function assertResolveInfoIsValid(ResolveInfo $info)
     {
         if ($info->field !== $this->propertyDefinition->getName()) {
-            throw new \RuntimeException(sprintf('Resolver was initialized for field %s but requested was %s.', $this->propertyDefinition->getName(), $info->field));
+            throw new \RuntimeException(
+                sprintf('Resolver was initialized for field %s but requested was %s.',
+                $this->propertyDefinition->getName(), $info->field)
+            );
         }
     }
 

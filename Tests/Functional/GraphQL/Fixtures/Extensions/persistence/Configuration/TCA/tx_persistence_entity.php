@@ -16,7 +16,7 @@ return [
             'disabled' => 'hidden',
         ],
         'versioningWS' => true,
-        'origUid' => 't3_origuid'
+        'origUid' => 't3_origuid',
     ],
     'columns' => [
         'sys_language_uid' => [
@@ -29,10 +29,10 @@ return [
                 'foreign_table_where' => 'ORDER BY sys_language.title',
                 'items' => [
                     ['LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.allLanguages', -1],
-                    ['LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.default_value', 0]
+                    ['LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.default_value', 0],
                 ],
-                'default' => 0
-            ]
+                'default' => 0,
+            ],
         ],
         'l10n_parent' => [
             'exclude' => true,
@@ -44,23 +44,26 @@ return [
                     ['', 0],
                 ],
                 'foreign_table' => 'tx_persistence_entity',
-                'foreign_table_where' => 'AND tx_persistence_entity.pid=###CURRENT_PID### AND tx_persistence_entity.sys_language_uid IN (-1,0)',
-                'default' => 0
-            ]
+                'foreign_table_where' => '
+                    AND tx_persistence_entity.pid=###CURRENT_PID###
+                    AND tx_persistence_entity.sys_language_uid IN (-1,0)
+                ',
+                'default' => 0,
+            ],
         ],
         'l10n_diffsource' => [
             'config' => [
                 'type' => 'passthrough',
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
         'hidden' => [
             'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.hidden',
             'config' => [
                 'type' => 'check',
-                'default' => 0
-            ]
+                'default' => 0,
+            ],
         ],
         'title' => [
             'exclude' => true,
@@ -69,8 +72,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'required'
-            ]
+                'eval' => 'required',
+            ],
         ],
         'scalar_string' => [
             'exclude' => true,
@@ -79,8 +82,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'required'
-            ]
+                'eval' => 'required',
+            ],
         ],
         'scalar_float' => [
             'exclude' => true,
@@ -89,8 +92,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'required'
-            ]
+                'eval' => 'required',
+            ],
         ],
         'scalar_integer' => [
             'exclude' => true,
@@ -99,8 +102,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'required'
-            ]
+                'eval' => 'required',
+            ],
         ],
         'scalar_text' => [
             'exclude' => true,
@@ -109,8 +112,8 @@ return [
             'config' => [
                 'type' => 'input',
                 'size' => 30,
-                'eval' => 'required'
-            ]
+                'eval' => 'required',
+            ],
         ],
         'relation_inline_11_file_reference' => [
             'exclude' => true,
@@ -120,14 +123,14 @@ return [
                 'foreign_field' => 'uid_foreign',
                 'foreign_label' => 'uid_local',
                 'foreign_match_fields' => [
-                    'fieldname' => 'relation_inline_11_file_reference'
+                    'fieldname' => 'relation_inline_11_file_reference',
                 ],
                 'foreign_selector' => 'uid_local',
                 'foreign_sortby' => 'sorting_foreign',
                 'foreign_table' => 'sys_file_reference',
                 'foreign_table_field' => 'tablenames',
-                'maxitems' => 1
-            ]
+                'maxitems' => 1,
+            ],
         ],
         'relation_inline_1n_file_reference' => [
             'exclude' => true,
@@ -137,14 +140,14 @@ return [
                 'foreign_field' => 'uid_foreign',
                 'foreign_label' => 'uid_local',
                 'foreign_match_fields' => [
-                    'fieldname' => 'relation_inline_1n_file_reference'
+                    'fieldname' => 'relation_inline_1n_file_reference',
                 ],
                 'foreign_selector' => 'uid_local',
                 'foreign_sortby' => 'sorting_foreign',
                 'foreign_table' => 'sys_file_reference',
                 'foreign_table_field' => 'tablenames',
-                'maxitems' => 10
-            ]
+                'maxitems' => 10,
+            ],
         ],
         'relation_inline_1n_csv_file_reference' => [
             'exclude' => true,
@@ -153,8 +156,8 @@ return [
                 'type' => 'inline',
                 'foreign_table' => 'sys_file_reference',
                 'maxitems' => 10,
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
         'relation_inline_mn_mm_content' => [
             'exclude' => true,
@@ -165,11 +168,11 @@ return [
                 'foreign_table_where' => ' AND tt_content.sys_language_uid IN (-1, 0) ORDER BY tt_content.sorting ASC',
                 'MM' => 'tx_persistence_entity_mm',
                 'MM_match_fields' => [
-                    'fieldname' => 'relation_inline_mn_mm_content'
+                    'fieldname' => 'relation_inline_mn_mm_content',
                 ],
                 'maxitems' => 10,
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
         'relation_inline_mn_symmetric_entity' => [
             'exclude' => true,
@@ -182,8 +185,8 @@ return [
                 'symmetric_field' => 'peer',
                 'symmetric_sortby' => 'sorting_peer',
                 'maxitems' => 10,
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
         'relation_select_1n_page' => [
             'exclude' => true,
@@ -193,8 +196,8 @@ return [
                 'renderType' => 'selectSingle',
                 'foreign_table' => 'pages',
                 'maxitems' => 1,
-                'default' => 0
-            ]
+                'default' => 0,
+            ],
         ],
         'relation_select_mn_csv_category' => [
             'exclude' => true,
@@ -204,8 +207,8 @@ return [
                 'renderType' => 'selectSingle',
                 'foreign_table' => 'sys_category',
                 'maxitems' => 10,
-                'default' => 0
-            ]
+                'default' => 0,
+            ],
         ],
         'relation_select_mn_mm_content' => [
             'exclude' => true,
@@ -217,13 +220,13 @@ return [
                 'foreign_table_where' => ' AND tt_content.sys_language_uid IN (-1, 0) ORDER BY tt_content.sorting ASC',
                 'MM' => 'tx_persistence_entity_mm',
                 'MM_match_fields' => [
-                    'fieldname' => 'relation_select_mn_mm_content'
+                    'fieldname' => 'relation_select_mn_mm_content',
                 ],
                 'MM_table_where' => ' AND further = 1',
                 'size' => 6,
                 'maxitems' => 10,
-                'default' => 0
-            ]
+                'default' => 0,
+            ],
         ],
         'relation_group_1n_content_page' => [
             'exclude' => true,
@@ -234,8 +237,8 @@ return [
                 'allowed' => 'tt_content,pages',
                 'maxitems' => 1,
                 'autoSizeMax' => 10,
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
         'relation_group_mn_csv_content_page' => [
             'exclude' => true,
@@ -246,8 +249,8 @@ return [
                 'allowed' => 'tt_content,pages',
                 'maxitems' => 10,
                 'autoSizeMax' => 10,
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
         'relation_group_mn_csv_any' => [
             'exclude' => true,
@@ -258,8 +261,8 @@ return [
                 'allowed' => '*',
                 'maxitems' => 10,
                 'autoSizeMax' => 10,
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
         'relation_group_mn_mm_content_page' => [
             'exclude' => true,
@@ -270,12 +273,12 @@ return [
                 'allowed' => 'tt_content,pages',
                 'MM' => 'tx_persistence_entity_mm',
                 'MM_match_fields' => [
-                    'fieldname' => 'relation_group_mn_mm_content_page'
+                    'fieldname' => 'relation_group_mn_mm_content_page',
                 ],
                 'maxitems' => 10,
                 'autoSizeMax' => 10,
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
         'relation_group_mn_mm_any' => [
             'exclude' => true,
@@ -286,24 +289,45 @@ return [
                 'allowed' => '*',
                 'MM' => 'tx_persistence_entity_mm',
                 'MM_match_fields' => [
-                    'fieldname' => 'relation_group_mn_mm_any'
+                    'fieldname' => 'relation_group_mn_mm_any',
                 ],
                 'maxitems' => 10,
                 'autoSizeMax' => 10,
-                'default' => ''
-            ]
-        ]
+                'default' => '',
+            ],
+        ],
     ],
     'types' => [
         '0' => [
-            'showitem' =>
-                '--div--;LLL:EXT:irre_tutorial/Resources/Private/Language/locallang_db.xml:tabs.general, title,scalar_string, scalar_float, scalar_integer, scalar_text, relation_inline_11_file, relation_inline_1n_file, relation_inline_1n_csv_file, relation_inline_mn_mm_content, relation_inline_mn_symmetric_entity, relation_select_1n_page, relation_select_mn_csv_category, relation_select_mn_mm_content, relation_group_1n_content_page, relation_group_mn_csv_content_page, relation_group_mn_mm_content_page' .
-                '--div--;LLL:EXT:irre_tutorial/Resources/Private/Language/locallang_db.xml:tabs.visibility, sys_language_uid, l10n_parent, l10n_diffsource, hidden'
-        ]
+            'showitem' => '
+                --div--;LLL:EXT:irre_tutorial/Resources/Private/Language/locallang_db.xml:tabs.general,
+                    title,
+                    scalar_string,
+                    scalar_float,
+                    scalar_integer,
+                    scalar_text,
+                    relation_inline_11_file,
+                    relation_inline_1n_file,
+                    relation_inline_1n_csv_file,
+                    relation_inline_mn_mm_content,
+                    relation_inline_mn_symmetric_entity,
+                    relation_select_1n_page,
+                    relation_select_mn_csv_category,
+                    relation_select_mn_mm_content,
+                    relation_group_1n_content_page,
+                    relation_group_mn_csv_content_page,
+                    relation_group_mn_mm_content_page
+                --div--;LLL:EXT:irre_tutorial/Resources/Private/Language/locallang_db.xml:tabs.visibility,
+                    sys_language_uid,
+                    l10n_parent,
+                    l10n_diffsource,
+                    hidden
+            ',
+        ],
     ],
     'palettes' => [
         '1' => [
-            'showitem' => ''
-        ]
-    ]
+            'showitem' => '',
+        ],
+    ],
 ];

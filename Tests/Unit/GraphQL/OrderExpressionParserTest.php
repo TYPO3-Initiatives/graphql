@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\Tests\Unit\GraphQL;
 
 /*
@@ -24,7 +25,6 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 */
 class OrderExpressionParserTest extends UnitTestCase
 {
-
     public function invalidExpressionProvider()
     {
         return [
@@ -45,7 +45,7 @@ class OrderExpressionParserTest extends UnitTestCase
             ['on ascending foo'],
             ['foo on descending ascending'],
             ['ascending on descending'],
-            ['ascending on descending ascending']
+            ['ascending on descending ascending'],
         ];
     }
 
@@ -71,13 +71,13 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 '   foo     ascending   ',
@@ -88,13 +88,13 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo.bar ascending',
@@ -106,13 +106,13 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'foo'],
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 '   foo   .    bar    ascending',
@@ -124,13 +124,13 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'foo'],
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo descending, bar ascending',
@@ -141,11 +141,11 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
-                            ['order', 'descending']
-                        ]
+                            ['order', 'descending'],
+                        ],
                     ],
                     [
                         'id' => '#field',
@@ -153,13 +153,13 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo descending         ,bar ascending ',
@@ -170,11 +170,11 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
-                            ['order', 'descending']
-                        ]
+                            ['order', 'descending'],
+                        ],
                     ],
                     [
                         'id' => '#field',
@@ -182,13 +182,13 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo.bar descending, bar.foo ascending',
@@ -200,11 +200,11 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'foo'],
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
-                            ['order', 'descending']
-                        ]
+                            ['order', 'descending'],
+                        ],
                     ],
                     [
                         'id' => '#field',
@@ -213,13 +213,13 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'bar'],
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 '  foo       . bar descending           ,    bar .          foo ascending    ',
@@ -231,11 +231,11 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'foo'],
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
-                            ['order', 'descending']
-                        ]
+                            ['order', 'descending'],
+                        ],
                     ],
                     [
                         'id' => '#field',
@@ -244,13 +244,13 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'bar'],
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo on bar ascending',
@@ -261,19 +261,19 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
                             [
                                 'id' => '#constraint',
                                 'children' => [
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 '   foo      on    bar descending        ',
@@ -284,19 +284,19 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
                             [
                                 'id' => '#constraint',
                                 'children' => [
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
-                            ['order', 'descending']
-                        ]
-                    ]
-                ]
+                            ['order', 'descending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo.bar on baz descending, bar on qux ascending',
@@ -308,17 +308,17 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'foo'],
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
                             [
                                 'id' => '#constraint',
                                 'children' => [
-                                    ['identifier', 'baz']
-                                ]
+                                    ['identifier', 'baz'],
+                                ],
                             ],
-                            ['order', 'descending']
-                        ]
+                            ['order', 'descending'],
+                        ],
                     ],
                     [
                         'id' => '#field',
@@ -326,19 +326,19 @@ class OrderExpressionParserTest extends UnitTestCase
                             [
                                 'id' => '#path',
                                 'children' => [
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
                             [
                                 'id' => '#constraint',
                                 'children' => [
-                                    ['identifier', 'qux']
-                                ]
+                                    ['identifier', 'qux'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
             ],
             [
                 '  foo       . bar    on baz          descending           ,    bar .          foo ascending    ',
@@ -350,17 +350,17 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'foo'],
-                                    ['identifier', 'bar']
-                                ]
+                                    ['identifier', 'bar'],
+                                ],
                             ],
                             [
                                 'id' => '#constraint',
                                 'children' => [
-                                    ['identifier', 'baz']
-                                ]
+                                    ['identifier', 'baz'],
+                                ],
                             ],
-                            ['order', 'descending']
-                        ]
+                            ['order', 'descending'],
+                        ],
                     ],
                     [
                         'id' => '#field',
@@ -369,14 +369,14 @@ class OrderExpressionParserTest extends UnitTestCase
                                 'id' => '#path',
                                 'children' => [
                                     ['identifier', 'bar'],
-                                    ['identifier', 'foo']
-                                ]
+                                    ['identifier', 'foo'],
+                                ],
                             ],
-                            ['order', 'ascending']
-                        ]
-                    ]
-                ]
-            ]
+                            ['order', 'ascending'],
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -388,7 +388,7 @@ class OrderExpressionParserTest extends UnitTestCase
     {
         $this->assertEquals($this->buildTree([
             'id' => '#expression',
-            'children' => $expected
+            'children' => $expected,
         ]), OrderExpressionParser::parse($expression));
     }
 

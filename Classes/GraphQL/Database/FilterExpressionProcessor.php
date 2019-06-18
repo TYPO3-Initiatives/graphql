@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
 /*
@@ -33,7 +34,7 @@ class FilterExpressionProcessor
         '#less_than' => ['lt', 'gte'],
         '#greater_than' => ['gt', 'lte'],
         '#greater_than_equals' => ['gte', 'lt'],
-        '#less_than_equals' => ['lte', 'gt']
+        '#less_than_equals' => ['lte', 'gt'],
     ];
 
     /**
@@ -100,7 +101,7 @@ class FilterExpressionProcessor
     {
         $path = $node->getChild($node->getChild(0)->getId() === '#path' ? 0 : 1);
 
-        return implode('.', array_map(function(TreeNode $node) {
+        return implode('.', array_map(function (TreeNode $node) {
             return $node->getValueValue();
         }, $path->getChildren()));
     }
@@ -140,7 +141,7 @@ class FilterExpressionProcessor
         return !$node->isToken() && in_array($node->getId(), [
             '#equals', '#not_equals',
             '#greater_than', '#less_than',
-            '#greater_than_equals', '#less_than_equals'
+            '#greater_than_equals', '#less_than_equals',
         ]);
     }
 
@@ -150,7 +151,7 @@ class FilterExpressionProcessor
             return false;
         }
 
-        if (count(array_filter($node->getChildren(), function(TreeNode $node) {
+        if (count(array_filter($node->getChildren(), function (TreeNode $node) {
             return $node->isToken() && $node->getValueToken() === 'null';
         })) !== 1) {
             return false;

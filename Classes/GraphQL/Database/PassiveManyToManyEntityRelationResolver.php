@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
 /*
@@ -58,7 +59,7 @@ class PassiveManyToManyEntityRelationResolver extends AbstractPassiveEntityRelat
                 $associativeTable,
                 $table,
                 $table,
-                (string)$builder->expr()->andX(
+                (string) $builder->expr()->andX(
                     $builder->expr()->eq(
                         $this->getColumnIdentifier(
                             $associativeTable,

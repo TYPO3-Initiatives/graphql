@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
 /*
@@ -15,13 +16,13 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
+use GraphQL\Type\Definition\ResolveInfo;
 use Hoa\Compiler\Llk\TreeNode;
 use IteratorAggregate;
-use TYPO3\CMS\Core\Database\Query\QueryHelper;
-use Webmozart\Assert\Assert;
-use GraphQL\Type\Definition\ResolveInfo;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Database\Query\QueryHelper;
+use Webmozart\Assert\Assert;
 
 class OrderExpressionTraversable implements IteratorAggregate
 {
@@ -33,7 +34,7 @@ class OrderExpressionTraversable implements IteratorAggregate
         'asc' => self::ORDER_ASCENDING,
         'desc' => self::ORDER_DESCENDING,
         'ascending' => self::ORDER_ASCENDING,
-        'descending' => self::ORDER_DESCENDING
+        'descending' => self::ORDER_DESCENDING,
     ];
 
     /**
@@ -54,7 +55,10 @@ class OrderExpressionTraversable implements IteratorAggregate
     public function __construct(ResolveInfo $info, ?TreeNode $expression, string ...$types)
     {
         Assert::keyExists($info->returnType->config, 'meta');
-        Assert::isInstanceOfAny($info->returnType->config['meta'], [EntityDefinition::class, PropertyDefinition::class]);
+        Assert::isInstanceOfAny(
+            $info->returnType->config['meta'],
+            [EntityDefinition::class, PropertyDefinition::class]
+        );
 
         $this->info = $info;
         $this->expression = $expression;
@@ -77,7 +81,7 @@ class OrderExpressionTraversable implements IteratorAggregate
                 yield [
                     'constraint' => $constraint,
                     'field' => $field,
-                    'order' => self::ORDER_MAPPINGS[strtolower($order)]
+                    'order' => self::ORDER_MAPPINGS[strtolower($order)],
                 ];
             }
         } else {
@@ -89,7 +93,7 @@ class OrderExpressionTraversable implements IteratorAggregate
                     yield [
                         'constraint' => $type,
                         'field' => $item[0],
-                        'order' => self::ORDER_MAPPINGS[strtolower($item[1] ?? 'ascending')]
+                        'order' => self::ORDER_MAPPINGS[strtolower($item[1] ?? 'ascending')],
                     ];
                 }
             }

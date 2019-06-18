@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\Tests\Unit\GraphQL;
 
 /*
@@ -24,7 +25,6 @@ use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 */
 class FilterExpressionParserTest extends UnitTestCase
 {
-
     public function invalidExpressionProvider()
     {
         return [
@@ -72,10 +72,10 @@ class FilterExpressionParserTest extends UnitTestCase
                                 [
                                     'id' => '#path',
                                     'children' => [
-                                        ['identifier', 'foo']
-                                    ]
-                                ]
-                            ]
+                                        ['identifier', 'foo'],
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'id' => '#field',
@@ -83,13 +83,13 @@ class FilterExpressionParserTest extends UnitTestCase
                                 [
                                     'id' => '#path',
                                     'children' => [
-                                        ['identifier', 'bar']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                        ['identifier', 'bar'],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo.bar != baz',
@@ -103,10 +103,10 @@ class FilterExpressionParserTest extends UnitTestCase
                                     'id' => '#path',
                                     'children' => [
                                         ['identifier', 'foo'],
-                                        ['identifier', 'bar']
-                                    ]
-                                ]
-                            ]
+                                        ['identifier', 'bar'],
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'id' => '#field',
@@ -114,13 +114,13 @@ class FilterExpressionParserTest extends UnitTestCase
                                 [
                                     'id' => '#path',
                                     'children' => [
-                                        ['identifier', 'baz']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                        ['identifier', 'baz'],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'not foo.bar.baz >= 123',
@@ -138,16 +138,16 @@ class FilterExpressionParserTest extends UnitTestCase
                                             'children' => [
                                                 ['identifier', 'foo'],
                                                 ['identifier', 'bar'],
-                                                ['identifier', 'baz']
-                                            ]
-                                        ]
-                                    ]
+                                                ['identifier', 'baz'],
+                                            ],
+                                        ],
+                                    ],
                                 ],
-                                ['integer', '123']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['integer', '123'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo.bar != `:`',
@@ -161,14 +161,14 @@ class FilterExpressionParserTest extends UnitTestCase
                                     'id' => '#path',
                                     'children' => [
                                         ['identifier', 'foo'],
-                                        ['identifier', 'bar']
-                                    ]
-                                ]
-                            ]
+                                        ['identifier', 'bar'],
+                                    ],
+                                ],
+                            ],
                         ],
-                        ['string', '`:`']
-                    ]
-                ]
+                        ['string', '`:`'],
+                    ],
+                ],
             ],
             [
                 'foo.bar on baz match `^.*\`.*$`',
@@ -182,20 +182,20 @@ class FilterExpressionParserTest extends UnitTestCase
                                     'id' => '#path',
                                     'children' => [
                                         ['identifier', 'foo'],
-                                        ['identifier', 'bar']
-                                    ]
+                                        ['identifier', 'bar'],
+                                    ],
                                 ],
                                 [
                                     'id' => '#constraint',
                                     'children' => [
-                                        ['identifier', 'baz']
-                                    ]
-                                ]
-                            ]
+                                        ['identifier', 'baz'],
+                                    ],
+                                ],
+                            ],
                         ],
-                        ['string', '`^.*\`.*$`']
-                    ]
-                ]
+                        ['string', '`^.*\`.*$`'],
+                    ],
+                ],
             ],
             [
                 'foo in [1.23, 12.3, -.123, 0.123]',
@@ -208,10 +208,10 @@ class FilterExpressionParserTest extends UnitTestCase
                                 [
                                     'id' => '#path',
                                     'children' => [
-                                        ['identifier', 'foo']
-                                    ]
-                                ]
-                            ]
+                                        ['identifier', 'foo'],
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'id' => '#list',
@@ -219,11 +219,11 @@ class FilterExpressionParserTest extends UnitTestCase
                                 ['float', '1.23'],
                                 ['float', '12.3'],
                                 ['float', '-.123'],
-                                ['float', '0.123']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['float', '0.123'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo in [0, 12, -123]',
@@ -236,21 +236,21 @@ class FilterExpressionParserTest extends UnitTestCase
                                 [
                                     'id' => '#path',
                                     'children' => [
-                                        ['identifier', 'foo']
-                                    ]
-                                ]
-                            ]
+                                        ['identifier', 'foo'],
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'id' => '#list',
                             'children' => [
                                 ['integer', '0'],
                                 ['integer', '12'],
-                                ['integer', '-123']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['integer', '-123'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo in [`bar`, `baz`, `qux`]',
@@ -263,21 +263,21 @@ class FilterExpressionParserTest extends UnitTestCase
                                 [
                                     'id' => '#path',
                                     'children' => [
-                                        ['identifier', 'foo']
-                                    ]
-                                ]
-                            ]
+                                        ['identifier', 'foo'],
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'id' => '#list',
                             'children' => [
                                 ['string', '`bar`'],
                                 ['string', '`baz`'],
-                                ['string', '`qux`']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['string', '`qux`'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'foo = bar or not baz match :qux',
@@ -293,10 +293,10 @@ class FilterExpressionParserTest extends UnitTestCase
                                         [
                                             'id' => '#path',
                                             'children' => [
-                                                ['identifier', 'foo']
-                                            ]
-                                        ]
-                                    ]
+                                                ['identifier', 'foo'],
+                                            ],
+                                        ],
+                                    ],
                                 ],
                                 [
                                     'id' => '#field',
@@ -304,12 +304,12 @@ class FilterExpressionParserTest extends UnitTestCase
                                         [
                                             'id' => '#path',
                                             'children' => [
-                                                ['identifier', 'bar']
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
+                                                ['identifier', 'bar'],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'id' => '#not',
@@ -323,23 +323,23 @@ class FilterExpressionParserTest extends UnitTestCase
                                                 [
                                                     'id' => '#path',
                                                     'children' => [
-                                                        ['identifier', 'baz']
-                                                    ]
-                                                ]
-                                            ]
+                                                        ['identifier', 'baz'],
+                                                    ],
+                                                ],
+                                            ],
                                         ],
                                         [
                                             'id' => '#parameter',
                                             'children' => [
-                                                ['identifier', 'qux']
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
+                                                ['identifier', 'qux'],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'not foo = false and bar = baz or qux = true',
@@ -361,15 +361,15 @@ class FilterExpressionParserTest extends UnitTestCase
                                                         [
                                                             'id' => '#path',
                                                             'children' => [
-                                                                ['identifier', 'foo']
-                                                            ]
-                                                        ]
-                                                    ]
+                                                                ['identifier', 'foo'],
+                                                            ],
+                                                        ],
+                                                    ],
                                                 ],
-                                                ['boolean', 'false']
-                                            ]
-                                        ]
-                                    ]
+                                                ['boolean', 'false'],
+                                            ],
+                                        ],
+                                    ],
                                 ],
                                 [
                                     'id' => '#equals',
@@ -380,10 +380,10 @@ class FilterExpressionParserTest extends UnitTestCase
                                                 [
                                                     'id' => '#path',
                                                     'children' => [
-                                                        ['identifier', 'bar']
-                                                    ]
-                                                ]
-                                            ]
+                                                        ['identifier', 'bar'],
+                                                    ],
+                                                ],
+                                            ],
                                         ],
                                         [
                                             'id' => '#field',
@@ -391,14 +391,14 @@ class FilterExpressionParserTest extends UnitTestCase
                                                 [
                                                     'id' => '#path',
                                                     'children' => [
-                                                        ['identifier', 'baz']
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
+                                                        ['identifier', 'baz'],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'id' => '#equals',
@@ -409,16 +409,16 @@ class FilterExpressionParserTest extends UnitTestCase
                                         [
                                             'id' => '#path',
                                             'children' => [
-                                                ['identifier', 'qux']
-                                            ]
-                                        ]
-                                    ]
+                                                ['identifier', 'qux'],
+                                            ],
+                                        ],
+                                    ],
                                 ],
-                                ['boolean', 'true']
-                            ]
-                        ]
-                    ]
-                ]
+                                ['boolean', 'true'],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'not (foo = null and (baz = true or foo = :bar))',
@@ -437,13 +437,13 @@ class FilterExpressionParserTest extends UnitTestCase
                                                 [
                                                     'id' => '#path',
                                                     'children' => [
-                                                        ['identifier', 'foo']
-                                                    ]
-                                                ]
-                                            ]
+                                                        ['identifier', 'foo'],
+                                                    ],
+                                                ],
+                                            ],
                                         ],
-                                        ['null', 'null']
-                                    ]
+                                        ['null', 'null'],
+                                    ],
                                 ],
                                 [
                                     'id' => '#or',
@@ -457,13 +457,13 @@ class FilterExpressionParserTest extends UnitTestCase
                                                         [
                                                             'id' => '#path',
                                                             'children' => [
-                                                                ['identifier', 'baz']
-                                                            ]
-                                                        ]
-                                                    ]
+                                                                ['identifier', 'baz'],
+                                                            ],
+                                                        ],
+                                                    ],
                                                 ],
-                                                ['boolean', 'true']
-                                            ]
+                                                ['boolean', 'true'],
+                                            ],
                                         ],
                                         [
                                             'id' => '#equals',
@@ -474,26 +474,26 @@ class FilterExpressionParserTest extends UnitTestCase
                                                         [
                                                             'id' => '#path',
                                                             'children' => [
-                                                                ['identifier', 'foo']
-                                                            ]
-                                                        ]
-                                                    ]
+                                                                ['identifier', 'foo'],
+                                                            ],
+                                                        ],
+                                                    ],
                                                 ],
                                                 [
                                                     'id' => '#parameter',
                                                     'children' => [
-                                                        ['identifier', 'bar']
-                                                    ]
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                                                        ['identifier', 'bar'],
+                                                    ],
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -505,7 +505,7 @@ class FilterExpressionParserTest extends UnitTestCase
     {
         $this->assertEquals($this->buildTree([
             'id' => '#expression',
-            'children' => [$expected]
+            'children' => [$expected],
         ]), FilterExpressionParser::parse($expression));
     }
 

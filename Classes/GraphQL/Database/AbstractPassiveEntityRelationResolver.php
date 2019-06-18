@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
 /*
@@ -127,7 +128,7 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         );
 
         return [
-            $row[$alias]
+            $row[$alias],
         ];
     }
 
@@ -165,8 +166,9 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
     protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder, array $keys)
     {
         $expression = $arguments[EntitySchemaFactory::FILTER_ARGUMENT_NAME] ?? null;
+        $processor = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder);
 
-        $condition = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder)->process();
+        $condition = $processor->process();
         $condition = $condition !== null ? [$condition] : [];
 
         $condition[] = $builder->expr()->in(
@@ -189,8 +191,8 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
             if ($selection->kind === 'Field') {
                 foreach ($activeRelations as $activeRelation) {
                     $columns[] = $this->getColumnIdentifierForSelect(
-                        $activeRelation->getTo() instanceof EntityDefinition
-                            ? $activeRelation->getTo()->getName() : $activeRelation->getTo()->getEntityDefinition()->getName(),
+                        $activeRelation->getTo() instanceof EntityDefinition ? $activeRelation->getTo()->getName()
+                            : $activeRelation->getTo()->getEntityDefinition()->getName(),
                         $selection->name->value
                     );
                 }

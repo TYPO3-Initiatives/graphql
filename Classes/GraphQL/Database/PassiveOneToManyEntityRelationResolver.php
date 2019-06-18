@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
 /*
@@ -23,7 +24,6 @@ use Webmozart\Assert\Assert;
 
 class PassiveOneToManyEntityRelationResolver extends AbstractPassiveEntityRelationResolver
 {
-
     public static function canResolve(PropertyDefinition $propertyDefinition)
     {
         if ($propertyDefinition->isManyToManyRelationProperty()) {

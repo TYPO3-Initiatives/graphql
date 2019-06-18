@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL\Database;
 
 /*
@@ -50,13 +51,15 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
 
+        $column = $this->getPropertyDefinition()->getName();
+
         $keysIdentifier = $this->getCacheIdentifier('keys');
         $keys = $context['cache']->get($keysIdentifier) ?: [];
 
         if ($source !== null) {
-            Assert::keyExists($source, $this->getPropertyDefinition()->getName());
+            Assert::keyExists($source, $column);
 
-            foreach ($this->getForeignKeys((string)$source[$this->getPropertyDefinition()->getName()]) as $table => $identifier) {
+            foreach ($this->getForeignKeys((string) $source[$column]) as $table => $identifier) {
                 $keys[$table][] = $identifier;
             }
 
@@ -80,6 +83,8 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         $keysIdentifier = $this->getCacheIdentifier('keys');
         $keys = $context['cache']->get($keysIdentifier) ?: [];
 
+        $column = $this->getPropertyDefinition()->getName();
+
         $result = [];
         $tables = [];
 
@@ -99,7 +104,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
             $context['cache']->set($bufferIdentifier, $buffer);
         }
 
-        foreach ($this->getForeignKeys((string)$source[$this->getPropertyDefinition()->getName()]) as $table => $identifier) {
+        foreach ($this->getForeignKeys((string) $source[$column]) as $table => $identifier) {
             $tables[$table] = true;
             $result[] = $buffer[$table][$identifier];
         }
@@ -133,17 +138,26 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
         foreach ($this->getOrderBy($arguments, $info, $table) as $item) {
             $builder->addSelect($item['field']);
-            $builder->addOrderBy($item['field'], $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC');
+            $builder->addOrderBy(
+                $item['field'],
+                $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC'
+            );
         }
 
         return $builder;
     }
 
-    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder, string $table, array $keys): array
-    {
+    protected function getCondition(
+        array $arguments,
+        ResolveInfo $info,
+        QueryBuilder $builder,
+        string $table,
+        array $keys
+    ): array {
         $expression = $arguments[EntitySchemaFactory::FILTER_ARGUMENT_NAME] ?? null;
+        $processor = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder);
 
-        $condition = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder)->process();
+        $condition = $processor->process();
         $condition = $condition !== null ? [$condition] : [];
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();

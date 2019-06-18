@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+
 namespace TYPO3\CMS\Core\GraphQL;
 
 /*
@@ -17,7 +18,6 @@ namespace TYPO3\CMS\Core\GraphQL;
 
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
-use GraphQL\Type\Schema;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityRelationMapFactory;
 use TYPO3\CMS\Core\Context\Context;
@@ -26,7 +26,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
 {
-
     /**
      * @var Schema
      */
@@ -52,7 +51,7 @@ class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
             null,
             [
                 'cache' => $cache,
-                'context' => $context
+                'context' => $context,
             ],
             $bindings,
             null,
