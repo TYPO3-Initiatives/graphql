@@ -12,6 +12,10 @@ addons:
     packages:
       - parallel
 
+env:
+  global:
+    - CODACY_PROJECT_TOKEN=727c375148344e04973a6ee108d3967e
+
 install:
   - >
     composer install;
@@ -25,11 +29,12 @@ script:
   - >
     echo;
     echo "Running unit tests";
-    .build/bin/phpunit -c Build/UnitTests.xml --coverage-clover .build/clover.xml
+    .build/bin/phpunit -c Build/UnitTests.xml
   - >
     echo;
     echo "Running functional tests";
     export typo3DatabaseName="typo3";
     export typo3DatabaseHost="localhost";
     export typo3DatabaseUsername="root";
-    .build/bin/phpunit -c Build/FunctionalTests.xml
+    .build/bin/phpunit -c Build/FunctionalTests.xml --coverage-clover .build/coverage.xml;
+    .build/bin/codacycoverage clover .build/coverage.xml
