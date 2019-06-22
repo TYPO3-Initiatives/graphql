@@ -71,7 +71,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         $context['cache']->set($keysIdentifier, $keys);
     }
 
-    public function resolve($source, array $arguments, array $context, ResolveInfo $info): array
+    public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array
     {
         Assert::keyExists($source, $this->getPropertyDefinition()->getName());
         Assert::keyExists($context, 'cache');
@@ -111,7 +111,12 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
         $result = $this->orderResult($arguments, $info, array_keys($tables), $result);
 
-        return $result;
+        if (empty($result)) {
+            return $this->getMultiplicityConstraint()->getMinimum() > 0
+                || $this->getMultiplicityConstraint()->getMaximum() > 1 ? [] : null;
+        }
+
+        return $this->getMultiplicityConstraint()->getMaximum() > 1 ? $result : $result[0];
     }
 
     protected function getCacheIdentifier($identifier): string

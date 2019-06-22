@@ -20,6 +20,6 @@ use GraphQL\Type\Definition\ResolveInfo;
 
 interface ResolverInterface
 {
-    public function resolve($source, array $arguments, array $context, ResolveInfo $info): array;
+    public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array;
     public function getArguments(): array;
 }
