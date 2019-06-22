@@ -204,7 +204,7 @@ return [
             'label' => 'Category (select m:n csv)',
             'config' => [
                 'type' => 'select',
-                'renderType' => 'selectSingle',
+                'renderType' => 'selectMultipleSideBySide',
                 'foreign_table' => 'sys_category',
                 'maxitems' => 10,
                 'default' => 0,
@@ -215,7 +215,7 @@ return [
             'label' => 'Content (select m:n mm)',
             'config' => [
                 'type' => 'select',
-                'renderType' => 'selectSingle',
+                'renderType' => 'selectMultipleSideBySide',
                 'foreign_table' => 'tt_content',
                 'foreign_table_where' => ' AND tt_content.sys_language_uid IN (-1, 0) ORDER BY tt_content.sorting ASC',
                 'MM' => 'tx_persistence_entity_mm',

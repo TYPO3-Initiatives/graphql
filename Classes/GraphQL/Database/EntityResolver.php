@@ -27,7 +27,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class EntityResolver extends AbstractEntityResolver
 {
-    public function resolve($source, array $arguments, array $context, ResolveInfo $info): array
+    public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array
     {
         return $this->getBuilder($arguments, $info)
             ->execute()

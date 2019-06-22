@@ -46,7 +46,7 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
         $context['cache']->set($keysIdentifier, $keys);
     }
 
-    public function resolve($source, array $arguments, array $context, ResolveInfo $info): array
+    public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array
     {
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
@@ -72,7 +72,12 @@ abstract class AbstractPassiveEntityRelationResolver extends AbstractEntityRelat
             $context['cache']->set($bufferIdentifier, $buffer);
         }
 
-        return $buffer[$source['uid']] ?? [];
+        if (empty($buffer[$source['uid']])) {
+            return $this->getMultiplicityConstraint()->getMinimum() > 0
+                || $this->getMultiplicityConstraint()->getMaximum() > 1 ? [] : null;
+        }
+
+        return $this->getMultiplicityConstraint()->getMaximum() > 1 ? $buffer[$source['uid']] : $buffer[$source['uid']][0];
     }
 
     protected abstract function getType(array $source): string;

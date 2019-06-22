@@ -17,17 +17,12 @@
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/typo3-initiatives/configuration"
-        },
-        {
-            "type": "git",
-            "url": "https://github.com/typo3-initiatives/security"
+            "url": "https://github.com/witrin/configuration"
         }
     ],
     "require": {
         "typo3/cms-core": "10.0.*@dev",
-        "typo3/cms-configuration": "10.0.*@dev",
-        "typo3/cms-security": "10.0.*@dev",
+        "typo3/cms-configuration": "dev-property-constraints",
         "typo3/cms-backend": "10.0.*@dev",
         "typo3/cms-frontend": "10.0.*@dev",
         "typo3/cms-recordlist": "10.0.*@dev",

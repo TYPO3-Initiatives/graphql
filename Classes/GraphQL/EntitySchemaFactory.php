@@ -28,6 +28,7 @@ use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\GraphQL\Database\EntityResolver;
 use TYPO3\CMS\Core\GraphQL\EntityRelationResolverFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Configuration\MetaModel\MultiplicityConstraint;
 
 class EntitySchemaFactory
 {
@@ -164,14 +165,26 @@ class EntitySchemaFactory
     protected function buildCompositeFieldType(PropertyDefinition $propertyDefinition): Type
     {
         $activeRelations = $propertyDefinition->getActiveRelations();
+        $activeRelation = array_pop($activeRelations);
 
-        if (count($activeRelations) > 1) {
-            return Type::listOf($this->buildEntityInterfaceType());
-        } else if ($activeRelations[0]->getTo() instanceof PropertyDefinition) {
-            return Type::listOf($this->buildObjectType($activeRelations[0]->getTo()->getEntityDefinition()));
+        $type = !empty($activeRelations) ? $this->buildEntityInterfaceType() : $this->buildObjectType(
+            $activeRelation->getTo() instanceof PropertyDefinition
+                ? $activeRelation->getTo()->getEntityDefinition() : $activeRelation->getTo()
+        );
+
+        foreach ($propertyDefinition->getConstraints() as $constraint) {
+            if ($constraint instanceof MultiplicityConstraint) {
+                if ($constraint->getMinimum() > 0) {
+                    $type = Type::nonNull($type);
+                }
+                if ($constraint->getMaximum() === null || $constraint->getMaximum() > 1) {
+                    $type = Type::nonNull(Type::listOf($type));
+                }
+                break;
+            }
         }
 
-        return Type::listOf($this->buildObjectType($activeRelations[0]->getTo()));
+        return $type;
     }
 
     protected function buildScalarFieldType(PropertyDefinition $propertyDefinition): Type

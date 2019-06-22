@@ -18,6 +18,7 @@ namespace TYPO3\CMS\Core\GraphQL;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Configuration\MetaModel\MultiplicityConstraint;
 use TYPO3\CMS\Core\GraphQL\Type\FilterExpressionType;
 use TYPO3\CMS\Core\GraphQL\Type\OrderExpressionType;
 
@@ -28,9 +29,21 @@ abstract class AbstractEntityRelationResolver implements EntityRelationResolverI
      */
     protected $propertyDefinition;
 
+    /**
+     * @var MultiplicityConstraint
+     */
+    protected $multiplicityConstraint;
+
     public function __construct(PropertyDefinition $propertyDefinition)
     {
         $this->propertyDefinition = $propertyDefinition;
+
+        foreach ($propertyDefinition->getConstraints() as $constraint) {
+            if ($constraint instanceof MultiplicityConstraint) {
+                $this->multiplicityConstraint = $constraint;
+                break;
+            }
+        }
     }
 
     public function getArguments(): array
@@ -60,5 +73,10 @@ abstract class AbstractEntityRelationResolver implements EntityRelationResolverI
     protected function getPropertyDefinition(): PropertyDefinition
     {
         return $this->propertyDefinition;
+    }
+
+    protected function getMultiplicityConstraint(): MultiplicityConstraint
+    {
+        return $this->multiplicityConstraint;
     }
 }

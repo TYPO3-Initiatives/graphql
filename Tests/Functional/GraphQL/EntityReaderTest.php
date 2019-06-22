@@ -145,25 +145,25 @@ class EntityReaderTest extends FunctionalTestCase
                         'tx_persistence_entity' => [
                             [
                                 'title' => 'Entity 4',
-                                'relation_inline_11_file_reference' => [],
+                                'relation_inline_11_file_reference' => null,
                             ],
                             [
                                 'title' => 'Entity 2',
-                                'relation_inline_11_file_reference' => [],
+                                'relation_inline_11_file_reference' => null,
                             ],
                             [
                                 'title' => 'Entity 1',
                                 'relation_inline_11_file_reference' => [
-                                    ['title' => 'File reference 1'],
+                                    'title' => 'File reference 1',
                                 ],
                             ],
                             [
                                 'title' => 'Entity 3',
-                                'relation_inline_11_file_reference' => [],
+                                'relation_inline_11_file_reference' => null,
                             ],
                             [
                                 'title' => 'Entity 5',
-                                'relation_inline_11_file_reference' => [],
+                                'relation_inline_11_file_reference' => null,
                             ],
                         ],
                     ],
@@ -311,7 +311,7 @@ class EntityReaderTest extends FunctionalTestCase
                                 'relation_inline_mn_symmetric_entity' => [
                                     [
                                         'peer' => [
-                                            ['title' => 'Entity 2'],
+                                            'title' => 'Entity 2',
                                         ],
                                     ],
                                 ],
@@ -321,12 +321,12 @@ class EntityReaderTest extends FunctionalTestCase
                                 'relation_inline_mn_symmetric_entity' => [
                                     [
                                         'peer' => [
-                                            ['title' => 'Entity 2'],
+                                            'title' => 'Entity 2',
                                         ],
                                     ],
                                     [
                                         'peer' => [
-                                            ['title' => 'Entity 3'],
+                                            'title' => 'Entity 3',
                                         ],
                                     ],
                                 ],
@@ -336,7 +336,7 @@ class EntityReaderTest extends FunctionalTestCase
                                 'relation_inline_mn_symmetric_entity' => [
                                     [
                                         'peer' => [
-                                            ['title' => 'Entity 3'],
+                                            'title' => 'Entity 3',
                                         ],
                                     ],
                                 ],
@@ -363,25 +363,25 @@ class EntityReaderTest extends FunctionalTestCase
                         'tx_persistence_entity' => [
                             [
                                 'title' => 'Entity 4',
-                                'relation_select_1n_page' => [],
+                                'relation_select_1n_page' => null,
                             ],
                             [
                                 'title' => 'Entity 2',
                                 'relation_select_1n_page' => [
-                                    ['title' => 'Page 1.1'],
+                                    'title' => 'Page 1.1',
                                 ],
                             ],
                             [
                                 'title' => 'Entity 1',
-                                'relation_select_1n_page' => [],
+                                'relation_select_1n_page' => null,
                             ],
                             [
                                 'title' => 'Entity 3',
-                                'relation_select_1n_page' => [],
+                                'relation_select_1n_page' => null,
                             ],
                             [
                                 'title' => 'Entity 5',
-                                'relation_select_1n_page' => [],
+                                'relation_select_1n_page' => null,
                             ],
                         ],
                     ],
@@ -486,25 +486,25 @@ class EntityReaderTest extends FunctionalTestCase
                         'tx_persistence_entity' => [
                             [
                                 'title' => 'Entity 4',
-                                'relation_group_1n_content_page' => [],
+                                'relation_group_1n_content_page' => null,
                             ],
                             [
                                 'title' => 'Entity 2',
-                                'relation_group_1n_content_page' => [],
+                                'relation_group_1n_content_page' => null,
                             ],
                             [
                                 'title' => 'Entity 1',
-                                'relation_group_1n_content_page' => [],
+                                'relation_group_1n_content_page' => null,
                             ],
                             [
                                 'title' => 'Entity 3',
                                 'relation_group_1n_content_page' => [
-                                    ['title' => 'Page 1.2'],
+                                    'title' => 'Page 1.2',
                                 ],
                             ],
                             [
                                 'title' => 'Entity 5',
-                                'relation_group_1n_content_page' => [],
+                                'relation_group_1n_content_page' => null,
                             ],
                         ],
                     ],
