@@ -17,7 +17,7 @@
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/witrin/configuration"
+            "url": "https://github.com/typo3-initiatives/configuration"
         }
     ],
     "require": {

@@ -22,7 +22,7 @@ cache:
 
 install:
   - >
-    composer install;
+    composer install --prefer-dist;
     composer build:package:link
 
 script:
