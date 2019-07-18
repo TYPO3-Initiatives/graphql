@@ -22,7 +22,7 @@
     ],
     "require": {
         "typo3/cms-core": "10.0.*@dev",
-        "typo3/cms-configuration": "dev-property-constraints",
+        "typo3/cms-configuration": "10.0.*@dev",
         "typo3/cms-backend": "10.0.*@dev",
         "typo3/cms-frontend": "10.0.*@dev",
         "typo3/cms-recordlist": "10.0.*@dev",
