@@ -111,6 +111,11 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
         $result = $this->orderResult($arguments, $info, array_keys($tables), $result);
 
+        return $this->getResult($result);
+    }
+
+    protected function getResult(array $result): ?array
+    {
         if (empty($result)) {
             return $this->getMultiplicityConstraint()->getMinimum() > 0
                 || $this->getMultiplicityConstraint()->getMaximum() > 1 ? [] : null;
