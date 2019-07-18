@@ -16,6 +16,10 @@ env:
   global:
     - CODACY_PROJECT_TOKEN=727c375148344e04973a6ee108d3967e
 
+cache:
+  directories:
+  - $HOME/.composer/cache
+
 install:
   - >
     composer install;
