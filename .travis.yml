@@ -6,6 +6,8 @@ php:
 
 services:
   - mysql
+  - postgresql
+
 
 addons:
   apt:
@@ -15,6 +17,10 @@ addons:
 env:
   global:
     - CODACY_PROJECT_TOKEN=727c375148344e04973a6ee108d3967e
+  matrix:
+    - typo3DatabaseDriver=mysqli typo3DatabaseUsername=root typo3DatabaseHost=localhost typo3DatabaseName=test
+    - typo3DatabaseDriver=pdo_pgsql typo3DatabaseUsername=postgres typo3DatabaseHost=localhost typo3DatabaseName=test
+    - typo3DatabaseDriver=pdo_sqlite
 
 cache:
   directories:
@@ -37,8 +43,8 @@ script:
   - >
     echo;
     echo "Running functional tests";
-    export typo3DatabaseName="typo3";
-    export typo3DatabaseHost="localhost";
-    export typo3DatabaseUsername="root";
-    .build/bin/phpunit -c Build/FunctionalTests.xml --coverage-clover .build/coverage.xml;
+    .build/bin/phpunit -c Build/FunctionalTests.xml --coverage-clover .build/coverage.xml
+
+after_script:
+  - >
     .build/bin/codacycoverage clover .build/coverage.xml
