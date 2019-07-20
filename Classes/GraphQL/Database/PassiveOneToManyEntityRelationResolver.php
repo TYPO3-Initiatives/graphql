@@ -16,7 +16,6 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
-use GraphQL\Type\Definition\ResolveInfo;
 use TYPO3\CMS\Core\Configuration\MetaModel\ActivePropertyRelation;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -78,9 +77,9 @@ class PassiveOneToManyEntityRelationResolver extends AbstractPassiveEntityRelati
         return $activeRelation->getTo()->getName();
     }
 
-    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder, array $keys): array
+    protected function getCondition(QueryBuilder $builder, array $keys): array
     {
-        $condition = parent::getCondition($arguments, $info, $builder, $keys);
+        $condition = parent::getCondition($builder, $keys);
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
         $table = $this->getPropertyDefinition()->getEntityDefinition()->getName();

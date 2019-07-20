@@ -16,12 +16,9 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
-use EmptyIterator;
 use GraphQL\Type\Definition\ResolveInfo;
-use Traversable;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
 use Webmozart\Assert\Assert;
 
 class PassiveManyToManyEntityRelationResolver extends AbstractPassiveEntityRelationResolver
@@ -78,33 +75,12 @@ class PassiveManyToManyEntityRelationResolver extends AbstractPassiveEntityRelat
             );
         }
 
-        if (empty($arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME])) {
-            $builder->orderBy(
-                $this->getColumnIdentifier(
-                    $associativeTable,
-                    'sorting'
-                )
-            );
-        } else {
-            foreach ($this->getOrderBy($arguments, $info, ...$tables) as $item) {
-                foreach (empty($item['constraint']) ? $tables : [$item['constraint']] as $table) {
-                    $builder->addSelect(
-                        $this->getColumnIdentifierForSelect($table, $item['field'])
-                    );
-                    $builder->addOrderBy(
-                        $this->getColumnIdentifier($table, $item['field']),
-                        $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC'
-                    );
-                }
-            }
-        }
-
         return $builder;
     }
 
-    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder, array $keys): array
+    protected function getCondition(QueryBuilder $builder, array $keys): array
     {
-        $condition = parent::getCondition($arguments, $info, $builder, $keys);
+        $condition = parent::getCondition($builder, $keys);
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
         $table = $this->getTable();
@@ -131,12 +107,5 @@ class PassiveManyToManyEntityRelationResolver extends AbstractPassiveEntityRelat
         $columns[] = $this->getColumnIdentifierForSelect($this->getTable(), 'tablenames');
 
         return $columns;
-    }
-
-    protected function getOrderBy(array $arguments, ResolveInfo $info, string ...$tables): Traversable
-    {
-        // do not apply order on the association table
-        return count($tables) === 1 && $tables[0] === $this->getTable()
-            ? new EmptyIterator() : parent::getOrderBy($arguments, $info, ...$tables);
     }
 }

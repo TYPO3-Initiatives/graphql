@@ -17,7 +17,6 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
  */
 
 use GraphQL\Type\Definition\ResolveInfo;
-use Traversable;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\ActiveEntityRelation;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
@@ -85,7 +84,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
         $column = $this->getPropertyDefinition()->getName();
 
-        $result = [];
+        $value = [];
         $tables = [];
 
         if (!$context['cache']->has($bufferIdentifier)) {
@@ -93,6 +92,15 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
             foreach ($this->getPropertyDefinition()->getRelationTableNames() as $table) {
                 $builder = $this->getBuilder($arguments, $info, $table, $keys);
+
+                $context = array_merge($context, [
+                    'builder' => $builder,
+                    'tables' => [$table],
+                    'meta' => $this->getPropertyDefinition(),
+                ]);
+
+                $this->handlers->beforeResolve($source, $arguments, $context, $info);
+
                 $statement = $builder->execute();
 
                 while ($row = $statement->fetch()) {
@@ -106,22 +114,28 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
         foreach ($this->getForeignKeys((string) $source[$column]) as $table => $identifier) {
             $tables[$table] = true;
-            $result[] = $buffer[$table][$identifier];
+            $value[] = $buffer[$table][$identifier];
         }
 
-        $result = $this->orderResult($arguments, $info, array_keys($tables), $result);
+        $context = array_merge($context, [
+            'builder' => $builder,
+            'tables' => array_keys($tables),
+            'meta' => $this->getPropertyDefinition(),
+        ]);
 
-        return $this->getResult($result);
+        $value = $this->handlers->afterResolve($source, $arguments, $context, $info, $value);
+
+        return $this->getValue($value);
     }
 
-    protected function getResult(array $result): ?array
+    protected function getValue(?array $value): ?array
     {
-        if (empty($result)) {
+        if (empty($value)) {
             return $this->getMultiplicityConstraint()->getMinimum() > 0
                 || $this->getMultiplicityConstraint()->getMaximum() > 1 ? [] : null;
         }
 
-        return $this->getMultiplicityConstraint()->getMaximum() > 1 ? $result : $result[0];
+        return $this->getMultiplicityConstraint()->getMaximum() > 1 ? $value : $value[0];
     }
 
     protected function getCacheIdentifier($identifier): string
@@ -140,35 +154,18 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         $builder->select(...$this->getColumns($info, $table))
             ->from($table);
 
-        $condition = $this->getCondition($arguments, $info, $builder, $table, $keys);
+        $condition = $this->getCondition($builder, $table, $keys);
 
         if (!empty($condition)) {
             $builder->where(...$condition);
         }
 
-        foreach ($this->getOrderBy($arguments, $info, $table) as $item) {
-            $builder->addSelect($item['field']);
-            $builder->addOrderBy(
-                $item['field'],
-                $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC'
-            );
-        }
-
         return $builder;
     }
 
-    protected function getCondition(
-        array $arguments,
-        ResolveInfo $info,
-        QueryBuilder $builder,
-        string $table,
-        array $keys
-    ): array {
-        $expression = $arguments[EntitySchemaFactory::FILTER_ARGUMENT_NAME] ?? null;
-        $processor = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder);
-
-        $condition = $processor->process();
-        $condition = $condition !== null ? [$condition] : [];
+    protected function getCondition(QueryBuilder $builder, string $table, array $keys): array
+    {
+        $condition = [];
 
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
 
@@ -236,38 +233,5 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
             yield $table => $identifier;
         }
-    }
-
-    protected function getOrderBy(array $arguments, ResolveInfo $info, string $table): Traversable
-    {
-        $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
-
-        OrderExpressionValidator::validate($info, $expression, $table);
-
-        return GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, $table);
-    }
-
-    protected function orderResult(array $arguments, ResolveInfo $info, array $tables, array $rows): array
-    {
-        $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
-
-        if ($expression === null) {
-            return $rows;
-        }
-
-        $traversable = GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, ...$tables);
-        $arguments = [];
-
-        foreach ($traversable as $item) {
-            array_push($arguments, array_map(function ($row) use ($item) {
-                return !$item['constraint'] || $row[EntitySchemaFactory::ENTITY_TYPE_FIELD] === $item['constraint']
-                    ? $row[$item['field']] : null;
-            }, $rows), $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? SORT_ASC : SORT_DESC);
-        }
-
-        array_push($arguments, $rows);
-        array_multisort(...$arguments);
-
-        return array_pop($arguments);
     }
 }

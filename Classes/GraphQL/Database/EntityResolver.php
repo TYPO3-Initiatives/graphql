@@ -17,24 +17,31 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
  */
 
 use GraphQL\Type\Definition\ResolveInfo;
-use Traversable;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\GraphQL\AbstractEntityResolver;
-use TYPO3\CMS\Core\GraphQL\Database\FilterExpressionProcessor;
-use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class EntityResolver extends AbstractEntityResolver
 {
     public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array
     {
-        return $this->getBuilder($arguments, $info)
-            ->execute()
-            ->fetchAll();
+        $builder = $this->getBuilder($info);
+
+        $context = array_merge($context, [
+            'builder' => $builder,
+            'tables' => [$this->getTable()],
+            'meta' => $this->getEntityDefinition(),
+        ]);
+
+        $this->handlers->beforeResolve($source, $arguments, $context, $info);
+
+        $value = $builder->execute()->fetchAll();
+
+        return $this->handlers->afterResolve($source, $arguments, $context, $info, $value);
     }
 
-    protected function getBuilder(array $arguments, ResolveInfo $info): QueryBuilder
+    protected function getBuilder(ResolveInfo $info): QueryBuilder
     {
         $table = $this->getTable();
 
@@ -47,31 +54,7 @@ class EntityResolver extends AbstractEntityResolver
         $builder->select(...$this->getColumns($info))
             ->from($table);
 
-        $condition = $this->getCondition($arguments, $info, $builder);
-
-        if (!empty($condition)) {
-            $builder->where(...$condition);
-        }
-
-        foreach ($this->getOrderBy($arguments, $info, $table) as $item) {
-            $builder->addSelect($item['field']);
-            $builder->addOrderBy(
-                $item['field'],
-                $item['order'] === OrderExpressionTraversable::ORDER_ASCENDING ? 'ASC' : 'DESC'
-            );
-        }
-
         return $builder;
-    }
-
-    protected function getCondition(array $arguments, ResolveInfo $info, QueryBuilder $builder): array
-    {
-        $expression = $arguments[EntitySchemaFactory::FILTER_ARGUMENT_NAME] ?? null;
-        $processor = GeneralUtility::makeInstance(FilterExpressionProcessor::class, $info, $expression, $builder);
-
-        $condition = $processor->process();
-
-        return $condition !== null ? [$condition] : [];
     }
 
     protected function getTable(): string
@@ -90,14 +73,5 @@ class EntityResolver extends AbstractEntityResolver
         }
 
         return $columns;
-    }
-
-    protected function getOrderBy(array $arguments, ResolveInfo $info, string $table): Traversable
-    {
-        $expression = $arguments[EntitySchemaFactory::ORDER_ARGUMENT_NAME] ?? null;
-
-        OrderExpressionValidator::validate($info, $expression, $table);
-
-        return GeneralUtility::makeInstance(OrderExpressionTraversable::class, $info, $expression, $table);
     }
 }

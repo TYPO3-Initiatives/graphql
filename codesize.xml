@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<ruleset name="TYPO3 CMS GraphQL"
+         xmlns="http://pmd.sf.net/ruleset/1.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+         xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+    <rule ref="rulesets/cleancode.xml">
+        <exclude name="ElseExpression"/>
+        <exclude name="StaticAccess"/>
+    </rule>
+    <rule ref="rulesets/codesize.xml">
+    </rule>
+    <rule ref="rulesets/controversial.xml">
+        <exclude name="Superglobals"/>
+    </rule>
+    <rule ref="rulesets/design.xml">
+    </rule>
+    <rule ref="rulesets/naming.xml">
+        <exclude name="LongVariable"/>
+    </rule>
+    <rule ref="rulesets/unusedcode.xml">
+        <exclude name="UnusedFormalParameter"/>
+    </rule>
+    <exclude-pattern>Build/*</exclude-pattern>
+    <exclude-pattern>Tests/*</exclude-pattern>
+    <exclude-pattern>ext_emconf.php</exclude-pattern>
+    <exclude-pattern>ext_localconf.php</exclude-pattern>
+</ruleset>

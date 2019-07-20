@@ -36,10 +36,6 @@ class EntitySchemaFactory
 
     const ENTITY_QUERY_NAME = 'entities';
 
-    const FILTER_ARGUMENT_NAME = 'filter';
-
-    const ORDER_ARGUMENT_NAME = 'order';
-
     const ENTITY_TYPE_FIELD = '__table';
 
     /**
@@ -60,7 +56,8 @@ class EntitySchemaFactory
         ];
 
         foreach ($entityRelationMap->getEntityDefinitions() as $entityDefinition) {
-            $resolver = GeneralUtility::makeInstance(EntityResolver::class, $entityDefinition);
+            $handlers = GeneralUtility::makeInstance(ResolverHandlerFactory::class)->create();
+            $resolver = GeneralUtility::makeInstance(EntityResolver::class, $entityDefinition, $handlers);
             $type = Type::listOf($this->buildObjectType($entityDefinition));
 
             $type->config['meta'] = $entityDefinition;
@@ -124,8 +121,9 @@ class EntitySchemaFactory
                             $propertyDefinition->isRelationProperty() &&
                             !$propertyDefinition->isLanguageRelationProperty()
                         ) {
-                            $factory = GeneralUtility::makeInstance(EntityRelationResolverFactory::class);
-                            $resolver = $factory->create($propertyDefinition);
+                            $handlers = GeneralUtility::makeInstance(ResolverHandlerFactory::class)->create();
+                            $resolver = GeneralUtility::makeInstance(EntityRelationResolverFactory::class)
+                                ->create($propertyDefinition, $handlers);
 
                             $field['args'] = $resolver->getArguments();
                             $field['resolve'] = function ($source, $arguments, $context, $info) use ($resolver) {
@@ -159,9 +157,6 @@ class EntitySchemaFactory
         return $type;
     }
 
-    /**
-     * @todo Respect cardinality of relation properties
-     */
     protected function buildCompositeFieldType(PropertyDefinition $propertyDefinition): Type
     {
         $activeRelations = $propertyDefinition->getActiveRelations();

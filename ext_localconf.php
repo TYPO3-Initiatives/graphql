@@ -14,4 +14,8 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['gql'] = [
         \TYPO3\CMS\Core\GraphQL\Database\PassiveOneToManyEntityRelationResolver::class,
         \TYPO3\CMS\Core\GraphQL\Database\ActiveEntityRelationResolver::class,
     ],
+    'resolverHandler' => [
+        \TYPO3\CMS\Core\GraphQL\Database\EntityFilterHandler::class,
+        \TYPO3\CMS\Core\GraphQL\Database\EntityOrderHandler::class,
+    ],
 ];

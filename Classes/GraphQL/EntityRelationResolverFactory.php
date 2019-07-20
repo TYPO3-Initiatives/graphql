@@ -25,11 +25,11 @@ class EntityRelationResolverFactory implements SingletonInterface
     /**
      * @todo Use some configuration for this
      */
-    public function create(PropertyDefinition $propertyDefinition)
+    public function create(PropertyDefinition $propertyDefinition, ResolverHandlerChain $handlers = null)
     {
         foreach ($GLOBALS['TYPO3_CONF_VARS']['SYS']['gql']['entityRelationResolver'] as $entityRelationResolver) {
             if ($entityRelationResolver::canResolve($propertyDefinition)) {
-                return GeneralUtility::makeInstance($entityRelationResolver, $propertyDefinition);
+                return GeneralUtility::makeInstance($entityRelationResolver, $propertyDefinition, $handlers);
             }
         }
 

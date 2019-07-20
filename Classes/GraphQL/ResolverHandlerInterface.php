@@ -19,25 +19,37 @@ namespace TYPO3\CMS\Core\GraphQL;
 use GraphQL\Type\Definition\ResolveInfo;
 
 /**
- * Fetches data of a single query field.
+ * Decorates a resolver.
  * @internal
  */
-interface ResolverInterface
+interface ResolverHandlerInterface
 {
     /**
-     * Returns the data of the query field.
+     * Gets called before resolve.
      * 
      * @param mixed $source Previous value
      * @param array $arguments Arguments provided to the field in the query
      * @param array $context Contextual information
      * @param ResolveInfo $info Information about the current query as wel as schema details
+     * @see https://graphql.org/learn/execution/
+     */
+    public function beforeResolve($source, array $arguments, array $context, ResolveInfo $info): void;
+
+    /**
+     * Gets called after resolve.
+     * 
+     * @param mixed $source Previous value
+     * @param array $arguments Arguments provided to the field in the query
+     * @param array $context Contextual information
+     * @param ResolveInfo $info Information about the current query as wel as schema details
+     * @param array $value Value of the query field or null
      * @return null|array Value of the query field or null
      * @see https://graphql.org/learn/execution/
      */
-    public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array;
+    public function afterResolve($source, array $arguments, array $context, ResolveInfo $info, ?array $value): ?array;
 
     /**
-     * Returns the provided arguments of the query field.
+     * Returns the provided arguments.
      * 
      * @return array
      * @see https://webonyx.github.io/graphql-php/type-system/object-types/#field-arguments
