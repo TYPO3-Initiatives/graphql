@@ -20,6 +20,9 @@
     <filter>
         <whitelist>
             <directory suffix=".php">../Classes/</directory>
+            <exclude>
+                <directory suffix="Interface.php">../Classes/</directory>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>
