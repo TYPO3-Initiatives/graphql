@@ -19,6 +19,9 @@ namespace TYPO3\CMS\Core\GraphQL\Exception;
 use GraphQL\Error\ClientAware;
 use TYPO3\CMS\Core\Exception;
 
+/**
+ * @api
+ */
 class SchemaException extends Exception implements ClientAware
 {
     public function isClientSafe()

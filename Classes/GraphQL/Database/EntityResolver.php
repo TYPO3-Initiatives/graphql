@@ -17,28 +17,61 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
  */
 
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\GraphQL\AbstractEntityResolver;
+use TYPO3\CMS\Core\GraphQL\AbstractResolver;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class EntityResolver extends AbstractEntityResolver
+/**
+ * @internal
+ */
+class EntityResolver extends AbstractResolver
 {
+    /**
+     * @var EntityDefinition
+     */
+    protected $entityDefinition;
+
+    /**
+     * @inheritdoc
+     */
+    public static function canResolve(Type $type): bool
+    {
+        if (!isset($type->config['meta']) || !$type->config['meta'] instanceof EntityDefinition) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct(Type $type)
+    {
+        parent::__construct($type);
+
+        $this->entityDefinition = $type->config['meta'];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array
     {
         $builder = $this->getBuilder($info);
 
-        $context = array_merge($context, [
+        $this->onResolve($source, $arguments, array_merge($context, [
             'builder' => $builder,
-            'tables' => [$this->getTable()],
-            'meta' => $this->getEntityDefinition(),
-        ]);
-
-        $this->handlers->beforeResolve($source, $arguments, $context, $info);
+        ]), $info);
 
         $value = $builder->execute()->fetchAll();
 
-        return $this->handlers->afterResolve($source, $arguments, $context, $info, $value);
+        $value = $this->onResolved($value, $source, $arguments, $context, $info);
+
+        return $value;
     }
 
     protected function getBuilder(ResolveInfo $info): QueryBuilder
@@ -59,7 +92,7 @@ class EntityResolver extends AbstractEntityResolver
 
     protected function getTable(): string
     {
-        return $this->getEntityDefinition()->getName();
+        return $this->entityDefinition->getName();
     }
 
     protected function getColumns(ResolveInfo $info): array

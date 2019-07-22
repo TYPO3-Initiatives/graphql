@@ -24,19 +24,22 @@ use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+/**
+ * @api
+ */
 class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
 {
     /**
      * @var Schema
      */
-    protected static $entitySchema = null;
+    protected static $schema = null;
 
     public function __construct()
     {
-        if (self::$entitySchema === null) {
+        if (self::$schema === null) {
             $entityRelationMapFactory = GeneralUtility::makeInstance(EntityRelationMapFactory::class, $GLOBALS['TCA']);
-            $entitySchemaFactory = GeneralUtility::makeInstance(EntitySchemaFactory::class);
-            self::$entitySchema = $entitySchemaFactory->create($entityRelationMapFactory->create());
+            $schemaFactory = GeneralUtility::makeInstance(EntitySchemaFactory::class);
+            self::$schema = $schemaFactory->create($entityRelationMapFactory->create());
         }
     }
 
@@ -46,7 +49,7 @@ class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
         $cache->flush();
 
         return GraphQL::executeQuery(
-            self::$entitySchema,
+            self::$schema,
             $query,
             null,
             [

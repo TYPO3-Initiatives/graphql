@@ -24,12 +24,13 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityRelationMap;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-use TYPO3\CMS\Core\GraphQL\Database\EntityResolver;
-use TYPO3\CMS\Core\GraphQL\EntityRelationResolverFactory;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Configuration\MetaModel\MultiplicityConstraint;
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+/**
+ * @internal
+ */
 class EntitySchemaFactory
 {
     const ENTITY_INTERFACE_NAME = 'Entity';
@@ -48,6 +49,16 @@ class EntitySchemaFactory
      */
     protected static $interfaceTypes = [];
 
+    /**
+     * @var ResolverFactory
+     */
+    protected $resolverFactory;
+
+    public function __construct()
+    {
+        $this->resolverFactory = GeneralUtility::makeInstance(ResolverFactory::class);
+    }
+
     public function create(EntityRelationMap $entityRelationMap): Schema
     {
         $query = [
@@ -56,11 +67,10 @@ class EntitySchemaFactory
         ];
 
         foreach ($entityRelationMap->getEntityDefinitions() as $entityDefinition) {
-            $handlers = GeneralUtility::makeInstance(ResolverHandlerFactory::class)->create();
-            $resolver = GeneralUtility::makeInstance(EntityResolver::class, $entityDefinition, $handlers);
             $type = Type::listOf($this->buildObjectType($entityDefinition));
-
             $type->config['meta'] = $entityDefinition;
+
+            $resolver = $this->resolverFactory->create($type);
 
             $query['fields'][$entityDefinition->getName()] = [
                 'type' => $type,
@@ -111,19 +121,18 @@ class EntitySchemaFactory
                 ],
                 'fields' => function () use ($entityDefinition) {
                     return array_map(function ($propertyDefinition) {
+                        $type = $this->buildFieldType($propertyDefinition);
+
                         $field = [
                             'name' => $propertyDefinition->getName(),
-                            'type' => $this->buildFieldType($propertyDefinition),
+                            'type' => $type,
                             'meta' => $propertyDefinition,
                         ];
 
-                        if (
-                            $propertyDefinition->isRelationProperty() &&
-                            !$propertyDefinition->isLanguageRelationProperty()
+                        if ($propertyDefinition->isRelationProperty()
+                            && !$propertyDefinition->isLanguageRelationProperty()
                         ) {
-                            $handlers = GeneralUtility::makeInstance(ResolverHandlerFactory::class)->create();
-                            $resolver = GeneralUtility::makeInstance(EntityRelationResolverFactory::class)
-                                ->create($propertyDefinition, $handlers);
+                            $resolver = $this->resolverFactory->create($type);
 
                             $field['args'] = $resolver->getArguments();
                             $field['resolve'] = function ($source, $arguments, $context, $info) use ($resolver) {

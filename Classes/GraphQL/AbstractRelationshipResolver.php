@@ -17,10 +17,14 @@ namespace TYPO3\CMS\Core\GraphQL;
  */
 
 use GraphQL\Type\Definition\ResolveInfo;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use GraphQL\Type\Definition\Type;
 use TYPO3\CMS\Core\Configuration\MetaModel\MultiplicityConstraint;
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 
-abstract class AbstractEntityRelationResolver implements EntityRelationResolverInterface, BufferedResolverInterface
+/**
+ * @internal
+ */
+abstract class AbstractRelationshipResolver extends AbstractResolver implements BufferedResolverInterface
 {
     /**
      * @var PropertyDefinition
@@ -32,27 +36,18 @@ abstract class AbstractEntityRelationResolver implements EntityRelationResolverI
      */
     protected $multiplicityConstraint;
 
-    /**
-     * @var ResolverHandlerChain
-     */
-    protected $handlers;
-
-    public function __construct(PropertyDefinition $propertyDefinition, ResolverHandlerChain $handlers = null)
+    public function __construct(Type $type)
     {
-        $this->propertyDefinition = $propertyDefinition;
-        $this->handlers = $handlers;
+        parent::__construct($type);
 
-        foreach ($propertyDefinition->getConstraints() as $constraint) {
+        $this->propertyDefinition = $type->config['meta'];
+
+        foreach ($this->propertyDefinition->getConstraints() as $constraint) {
             if ($constraint instanceof MultiplicityConstraint) {
                 $this->multiplicityConstraint = $constraint;
                 break;
             }
         }
-    }
-
-    public function getArguments(): array
-    {
-        return $this->handlers ? $this->handlers->getArguments() : [];
     }
 
     protected function assertResolveInfoIsValid(ResolveInfo $info)

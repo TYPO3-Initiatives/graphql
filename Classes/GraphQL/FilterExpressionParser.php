@@ -21,6 +21,9 @@ use Hoa\Compiler\Llk\TreeNode;
 use Hoa\File\Read;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+/**
+ * @internal
+ */
 class FilterExpressionParser
 {
     protected static $compiler;

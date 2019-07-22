@@ -20,6 +20,10 @@ use GraphQL\Type\Definition\ResolveInfo;
 use Hoa\Compiler\Llk\TreeNode;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 
+/**
+ * @internal
+ * @todo Use full qualified identifer in SQL.
+ */
 class FilterExpressionProcessor
 {
     /**

@@ -19,6 +19,9 @@ namespace TYPO3\CMS\Core\GraphQL\Type;
 use GraphQL\Type\Definition\ScalarType;
 use TYPO3\CMS\Core\GraphQL\FilterExpressionParser;
 
+/**
+ * @internal
+ */
 class FilterExpressionType extends ScalarType
 {
     /**

@@ -20,39 +20,55 @@ use GraphQL\Type\Definition\ResolveInfo;
 
 /**
  * Decorates a resolver.
+ * 
  * @internal
  */
 interface ResolverHandlerInterface
 {
     /**
-     * Gets called before resolve.
-     * 
-     * @param mixed $source Previous value
-     * @param array $arguments Arguments provided to the field in the query
-     * @param array $context Contextual information
-     * @param ResolveInfo $info Information about the current query as wel as schema details
-     * @see https://graphql.org/learn/execution/
+     * Returns whether the resolver can be used for the given type or not.
+     *
+     * @param Type $type Type to resolve
+     * @return bool
      */
-    public function beforeResolve($source, array $arguments, array $context, ResolveInfo $info): void;
+    public static function canHandle(ResolverInterface $resolver): bool;
 
     /**
-     * Gets called after resolve.
-     * 
-     * @param mixed $source Previous value
-     * @param array $arguments Arguments provided to the field in the query
-     * @param array $context Contextual information
-     * @param ResolveInfo $info Information about the current query as wel as schema details
-     * @param array $value Value of the query field or null
-     * @return null|array Value of the query field or null
-     * @see https://graphql.org/learn/execution/
+     * Creates a resolver handler.
+     *
+     * @param ResolverInterface $resolver Resolver to decorate
      */
-    public function afterResolve($source, array $arguments, array $context, ResolveInfo $info, ?array $value): ?array;
+    public function __construct(ResolverInterface $resolver);
 
     /**
      * Returns the provided arguments.
-     * 
+     *
      * @return array
      * @see https://webonyx.github.io/graphql-php/type-system/object-types/#field-arguments
      */
     public function getArguments(): array;
+
+    /**
+     * Gets called before resolve.
+     *
+     * @param mixed $source Previous value
+     * @param array $arguments Arguments provided to the field in the query
+     * @param array $context Contextual information
+     * @param ResolveInfo $info Information about the current query as wel as schema details
+     * @see https://graphql.org/learn/execution/
+     */
+    public function onResolve($source, array $arguments, array $context, ResolveInfo $info): void;
+
+    /**
+     * Gets called after resolve.
+     *
+     * @param mixed $value Value of the query field or null
+     * @param mixed $source Previous value
+     * @param array $arguments Arguments provided to the field in the query
+     * @param array $context Contextual information
+     * @param ResolveInfo $info Information about the current query as wel as schema details
+     * @return mixed Value of the query field
+     * @see https://graphql.org/learn/execution/
+     */
+    public function onResolved($value, mixed $source, array $arguments, array $context, ResolveInfo $info);
 }

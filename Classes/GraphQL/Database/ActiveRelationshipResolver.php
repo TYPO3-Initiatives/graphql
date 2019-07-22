@@ -16,22 +16,37 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Doctrine\DBAL\ParameterType;
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\Type;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\ActiveEntityRelation;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\GraphQL\AbstractEntityRelationResolver;
+use TYPO3\CMS\Core\GraphQL\AbstractRelationshipResolver;
 use TYPO3\CMS\Core\GraphQL\EntitySchemaFactory;
+use TYPO3\CMS\Core\GraphQL\ResolverHelper;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Webmozart\Assert\Assert;
 
-class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
+/**
+ * @internal
+ */
+class ActiveRelationshipResolver extends AbstractRelationshipResolver
 {
-    public static function canResolve(PropertyDefinition $propertyDefinition)
+    /**
+     * @inheritdoc
+     */
+    public static function canResolve(Type $type): bool
     {
+        if (!isset($type->config['meta']) || !$type->config['meta'] instanceof PropertyDefinition) {
+            return false;
+        }
+
+        $propertyDefinition = $type->config['meta'];
+
         if ($propertyDefinition->isManyToManyRelationProperty()) {
             return false;
         }
@@ -45,6 +60,9 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function collect($source, array $arguments, array $context, ResolveInfo $info)
     {
         Assert::keyExists($context, 'cache');
@@ -70,6 +88,9 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         $context['cache']->set($keysIdentifier, $keys);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array
     {
         Assert::keyExists($source, $this->getPropertyDefinition()->getName());
@@ -91,21 +112,16 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
             $foreignKeyField = $this->getForeignKeyField();
 
             foreach ($this->getPropertyDefinition()->getRelationTableNames() as $table) {
-                $builder = $this->getBuilder($arguments, $info, $table, $keys);
+                $builder = $this->getBuilder($info, $table, $keys);
 
-                $context = array_merge($context, [
+                $this->onResolve($source, $arguments, array_merge($context, [
                     'builder' => $builder,
-                    'tables' => [$table],
-                    'meta' => $this->getPropertyDefinition(),
-                ]);
-
-                $this->handlers->beforeResolve($source, $arguments, $context, $info);
+                ]), $info);
 
                 $statement = $builder->execute();
 
                 while ($row = $statement->fetch()) {
-                    $row[EntitySchemaFactory::ENTITY_TYPE_FIELD] = $table;
-                    $buffer[$table][$row[$foreignKeyField]] = $row;
+                    $buffer[$row[EntitySchemaFactory::ENTITY_TYPE_FIELD]][$row[$foreignKeyField]] = $row;
                 }
             }
 
@@ -119,11 +135,9 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
 
         $context = array_merge($context, [
             'builder' => $builder,
-            'tables' => array_keys($tables),
-            'meta' => $this->getPropertyDefinition(),
         ]);
 
-        $value = $this->handlers->afterResolve($source, $arguments, $context, $info, $value);
+        $value = $this->onResolved($value, $source, $arguments, $context, $info);
 
         return $this->getValue($value);
     }
@@ -143,7 +157,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         return \spl_object_hash($this) . '_' . $identifier;
     }
 
-    protected function getBuilder(array $arguments, ResolveInfo $info, string $table, array $keys): QueryBuilder
+    protected function getBuilder(ResolveInfo $info, string $table, array $keys): QueryBuilder
     {
         $builder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable($table);
@@ -151,7 +165,7 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         $builder->getRestrictions()
             ->removeAll();
 
-        $builder->select(...$this->getColumns($info, $table))
+        $builder->selectLiteral(...$this->getColumns($info, $builder, $table))
             ->from($table);
 
         $condition = $this->getCondition($builder, $table, $keys);
@@ -188,32 +202,32 @@ class ActiveEntityRelationResolver extends AbstractEntityRelationResolver
         return $condition;
     }
 
-    /**
-     * @todo GraphQL standard compliance.
-     */
-    protected function getColumns(ResolveInfo $info, string $table): array
+    protected function getColumns(ResolveInfo $info, QueryBuilder $builder, string $table): array
     {
         $columns = [];
 
-        foreach ($info->fieldNodes[0]->selectionSet->selections as $selection) {
-            if ($selection->kind === 'Field') {
-                $columns[] = $selection->name->value;
-            } else if ($selection->kind === 'InlineFragment' && $selection->typeCondition->name->value === $table) {
-                foreach ($selection->selectionSet->selections as $selection) {
-                    if ($selection->kind === 'Field') {
-                        $columns[] = $selection->name->value;
-                    }
-                }
+        foreach (ResolverHelper::getFields($info, $table) as $field) {
+            $columns[$field->name->value] = $builder->quoteIdentifier($table . '.' . $field->name->value);
+        }
+
+        foreach (ResolverHelper::getFields($info) as $field) {
+            if (isset($columns[$field->name->value])) {
+                continue;
             }
+
+            $columns[] = 'NULL AS ' . $builder->quoteIdentifier($field->name->value);
         }
 
         $foreignKeyField = $this->getForeignKeyField();
 
         if ($foreignKeyField) {
-            $columns[] = $foreignKeyField;
+            $columns[] = $builder->quoteIdentifier($foreignKeyField);
         }
 
-        return $columns;
+        $columns[] = $builder->quote($table, ParameterType::STRING)
+            . ' AS ' . $builder->quoteIdentifier(EntitySchemaFactory::ENTITY_TYPE_FIELD);
+
+        return array_values($columns);
     }
 
     protected function getForeignKeyField(): string

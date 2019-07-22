@@ -175,7 +175,6 @@ class EntityReaderTest extends FunctionalTestCase
                         title
                         relation_inline_1n_file_reference {
                             title
-                            description
                         }
                     }
                 }',
@@ -193,8 +192,8 @@ class EntityReaderTest extends FunctionalTestCase
                             [
                                 'title' => 'Entity 1',
                                 'relation_inline_1n_file_reference' => [
-                                    ['title' => 'File reference 2', 'description' => null],
-                                    ['title' => 'File reference 3', 'description' => null],
+                                    ['title' => 'File reference 2'],
+                                    ['title' => 'File reference 3'],
                                 ],
                             ],
                             [
@@ -815,10 +814,10 @@ class EntityReaderTest extends FunctionalTestCase
                                 'uid' => '1026',
                                 'relation_group_mn_mm_content_page' => [
                                     ['uid' => '128', 'title' => 'Page 1'],
-                                    ['uid' => '129', 'title' => 'Page 1.1'],
-                                    ['uid' => '130', 'title' => 'Page 1.2'],
                                     ['uid' => '514', 'header' => 'Content 3'],
                                     ['uid' => '512', 'header' => 'Content 1'],
+                                    ['uid' => '129', 'title' => 'Page 1.1'],
+                                    ['uid' => '130', 'title' => 'Page 1.2'],
                                 ],
                             ],
                             [

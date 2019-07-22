@@ -18,6 +18,9 @@ namespace TYPO3\CMS\Core\GraphQL;
 
 use GraphQL\Type\Definition\ResolveInfo;
 
+/**
+ * @internal
+ */
 interface BufferedResolverInterface extends ResolverInterface
 {
     public function collect($source, array $arguments, array $context, ResolveInfo $info);

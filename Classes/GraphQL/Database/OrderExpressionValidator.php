@@ -25,23 +25,23 @@ use TYPO3\CMS\Core\GraphQL\Exception\NotSupportedException;
 use TYPO3\CMS\Core\GraphQL\Exception\SchemaException;
 use Webmozart\Assert\Assert;
 
+/**
+ * @internal
+ */
 class OrderExpressionValidator
 {
-    public static function validate(ResolveInfo $info, ?TreeNode $expression, string ...$types)
+    public static function validate(Type $type, ?TreeNode $expression, ResolveInfo $info)
     {
-        Assert::notEmpty($types);
-        Assert::keyExists($info->returnType->config, 'meta');
-        Assert::isInstanceOfAny(
-            $info->returnType->config['meta'],
-            [EntityDefinition::class, PropertyDefinition::class]
-        );
+        Assert::keyExists($type->config, 'meta');
+        Assert::isInstanceOfAny($type->config['meta'], [EntityDefinition::class, PropertyDefinition::class]);
 
         if ($expression === null) {
             return;
         }
 
         $schema = $info->schema;
-        $meta = $info->returnType->config['meta'];
+        $meta = $type->config['meta'];
+        $types = $meta instanceof EntityDefinition ? [$meta->getName()] : $meta->getRelationTableNames();
 
         foreach ($expression->getChildren() as $item) {
             $constraint = $item->getChildrenNumber() > 2 ? [$item->getChild(1)->getChild(0)->getValueValue()] : $types;
