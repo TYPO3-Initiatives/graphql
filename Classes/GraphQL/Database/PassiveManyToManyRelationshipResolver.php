@@ -44,6 +44,11 @@ class PassiveManyToManyRelationshipResolver extends AbstractPassiveRelationshipR
 
     /**
      * @inheritdoc
+     * @todo Prevent reaching maximum length of a generated SQL statement.
+     * @see https://www.sqlite.org/limits.html#max_sql_length
+     * @see https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_max_allowed_packet
+     * @see https://mariadb.com/kb/en/library/server-system-variables/#max_allowed_packet
+     * @see https://www.postgresql.org/docs/9.1/runtime-config-resource.html#GUC-MAX-STACK-DEPTH
      */
     public function resolve($source, array $arguments, array $context, ResolveInfo $info)
     {

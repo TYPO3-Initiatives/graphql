@@ -33,6 +33,9 @@ use Webmozart\Assert\Assert;
  */
 abstract class AbstractPassiveRelationshipResolver extends AbstractRelationshipResolver
 {
+    /**
+     * @inheritdoc
+     */
     public function collect($source, array $arguments, array $context, ResolveInfo $info)
     {
         Assert::keyExists($context, 'cache');
