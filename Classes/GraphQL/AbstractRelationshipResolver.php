@@ -18,6 +18,7 @@ namespace TYPO3\CMS\Core\GraphQL;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Configuration\MetaModel\MultiplicityConstraint;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 
@@ -53,9 +54,12 @@ abstract class AbstractRelationshipResolver extends AbstractResolver implements 
     protected function assertResolveInfoIsValid(ResolveInfo $info)
     {
         if ($info->field !== $this->propertyDefinition->getName()) {
-            throw new \RuntimeException(
-                sprintf('Resolver was initialized for field %s but requested was %s.',
-                $this->propertyDefinition->getName(), $info->field)
+            throw new Exception(
+                sprintf(
+                    'Resolver was initialized for field "%s" but requested was "%s"',
+                    $this->propertyDefinition->getName(), $info->field
+                ),
+                1563841651
             );
         }
     }

@@ -17,6 +17,7 @@ namespace TYPO3\CMS\Core\GraphQL;
  */
 
 use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -48,6 +49,9 @@ class ResolverFactory implements SingletonInterface
             }
         }
 
-        throw new \RuntimeException(sprintf('No resolver found for type %s', $type));
+        throw new Exception(
+            sprintf('No resolver found for type "%s"', $type),
+            1563841825
+        );
     }
 }
