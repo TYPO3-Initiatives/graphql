@@ -113,7 +113,6 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
         $value = [];
         $tables = [];
 
-        // this approach 
         if (!$context['cache']->has($bufferIdentifier)) {
             $foreignKeyField = $this->getForeignKeyField();
 
