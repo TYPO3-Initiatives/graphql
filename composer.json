@@ -64,6 +64,7 @@
         }
     },
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "scripts": {
         "build:package:link": [
             "TYPO3\\CMS\\Core\\GraphQL\\Build\\Composer\\ScriptHelper::linkPackage"
