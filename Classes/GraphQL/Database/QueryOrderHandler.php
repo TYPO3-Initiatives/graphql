@@ -86,7 +86,7 @@ class QueryOrderHandler extends AbstractResolverHandler
         $meta = $type->config['meta'];
         $expression = $arguments[self::ARGUMENT_NAME] ?? null;
 
-        OrderExpressionValidator::validate($type, $expression, $info);
+        GeneralUtility::makeInstance(OrderExpressionValidator::class, $type, $expression, $info)->validate();
 
         $items = GeneralUtility::makeInstance(OrderExpressionTraversable::class, $type, $expression);
 

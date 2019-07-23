@@ -19,6 +19,7 @@ namespace TYPO3\CMS\Core\GraphQL\Database;
 use GraphQL\Type\Definition\ResolveInfo;
 use Hoa\Compiler\Llk\TreeNode;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Exception;
 
 /**
  * @internal
@@ -68,37 +69,58 @@ class FilterExpressionProcessor
         return $this->expression !== null ? $this->processNode($this->expression->getChild(0)) : null;
     }
 
-    /**
-     * @todo Use visitor pattern.
-     */
-    protected function processNode(TreeNode $node, $negate = false)
+    protected function processNode(TreeNode $node, int $domain = 0)
     {
         if ($this->isNullComparison($node)) {
-            $field = $node->getChild(0)->isToken() ? $node->getChild(1) : $node->getChild(0);
-            $operation = $node->getId() === '#equals' && !$negate ? 'isNull' : 'isNotNull';
-
-            return $this->builder->expr()->{$operation}($this->processField($field));
-        } else if ($this->isBinaryLogicalOperation($node)) {
-            $left = $node->getChild(0);
-            $right = $node->getChild(1);
-
-            return $this->builder->expr()->{self::OPERATOR_MAPPING[$node->getId()][$negate ? 1 : 0]}(
-                $this->{'process'.$this->getType($left)}($left, $negate),
-                $this->{'process'.$this->getType($right)}($right, $negate)
-            );
-        } else if ($this->isComparison($node)) {
-            $field = $node->getChild($node->getChild(0)->getId() === '#field' ? 0 : 1);
-            $any = $node->getChild($node->getChild(0)->getId() !== '#field' ? 0 : 1);
-
-            return $this->builder->expr()->{self::OPERATOR_MAPPING[$node->getId()][$negate ? 1 : 0]}(
-                $this->processField($field),
-                $this->{'process'.$this->getType($any)}($any)
-            );
-        } else if ($this->isNegation($node)) {
-            return $this->processNode($node->getChildren()[0], true);
+            return $this->processNullComparison($node, $domain);
+        } elseif ($this->isBinaryLogicalOperation($node)) {
+            return $this->processBinaryLogicalOperation($node, $domain);
+        } elseif ($this->isComparison($node)) {
+            return $this->processComparison($node, $domain);
+        } elseif ($this->isNegation($node)) {
+            return $this->processNegation($node, $domain);
         }
 
-        throw new \Exception(sprintf('Unkown expression %s', $node->getId()));
+        throw new Exception(
+            sprintf('Failed to process node in expression "%s"', $this->expression),
+            1563841479
+        );
+    }
+
+    protected function processNullComparison(TreeNode $node, int $domain)
+    {
+        $field = $node->getChild(0)->isToken() ? $node->getChild(1) : $node->getChild(0);
+        $operation = ($node->getId() === '#equals' xor $domain === 0) ? 'isNotNull' : 'isNull';
+
+        return $this->builder->expr()->{$operation}($this->processField($field));
+    }
+
+    protected function processBinaryLogicalOperation(TreeNode $node, int $domain)
+    {
+        $left = $node->getChild(0);
+        $right = $node->getChild(1);
+        $operation = self::OPERATOR_MAPPING[$node->getId()][$domain];
+
+        return $this->builder->expr()->{$operation}(
+            $this->{'process' . $this->getType($left)}($left, $domain),
+            $this->{'process' . $this->getType($right)}($right, $domain)
+        );
+    }
+
+    protected function processComparison(TreeNode $node, int $domain)
+    {
+        $field = $node->getChild($node->getChild(0)->getId() === '#field' ? 0 : 1);
+        $any = $node->getChild($node->getChild(0)->getId() !== '#field' ? 0 : 1);
+
+        return $this->builder->expr()->{self::OPERATOR_MAPPING[$node->getId()][$domain]}(
+            $this->processField($field),
+            $this->{'process' . $this->getType($any)}($any)
+        );
+    }
+
+    protected function processNegation(TreeNode $node, int $domain)
+    {
+        return $this->processNode($node->getChildren()[0], ++$domain%2);
     }
 
     protected function processField(TreeNode $node)
@@ -164,7 +186,7 @@ class FilterExpressionProcessor
         return true;
     }
 
-    protected function isNegation(TreeNode $node)
+    protected function isNegation(TreeNode $node): bool
     {
         return !$node->isToken() && $node->getId() === '#not';
     }
