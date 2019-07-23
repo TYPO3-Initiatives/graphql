@@ -184,19 +184,22 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
         $propertyConfiguration = $this->getPropertyDefinition()->getConfiguration();
 
         $condition[] = $builder->expr()->in(
-            $this->getForeignKeyField(),
+            $table . '.' . $this->getForeignKeyField(),
             $builder->createNamedParameter($keys[$table], Connection::PARAM_INT_ARRAY)
         );
 
         if (isset($propertyConfiguration['config']['foreign_table_field'])) {
             $condition[] = $builder->expr()->eq(
-                $propertyConfiguration['config']['foreign_table_field'],
+                $table . '.' . $propertyConfiguration['config']['foreign_table_field'],
                 $builder->createNamedParameter($this->getPropertyDefinition()->getEntityDefinition()->getName())
             );
         }
 
         foreach ($propertyConfiguration['config']['foreign_match_fields'] ?? [] as $field => $match) {
-            $condition[] = $builder->expr()->eq($field, $builder->createNamedParameter($match));
+            $condition[] = $builder->expr()->eq(
+                $table . '.' . $field, 
+                $builder->createNamedParameter($match)
+            );
         }
 
         return $condition;
