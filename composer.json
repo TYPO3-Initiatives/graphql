@@ -23,11 +23,6 @@
     "require": {
         "typo3/cms-core": "10.0.*@dev",
         "typo3/cms-configuration": "10.0.*@dev",
-        "typo3/cms-backend": "10.0.*@dev",
-        "typo3/cms-frontend": "10.0.*@dev",
-        "typo3/cms-recordlist": "10.0.*@dev",
-        "typo3/cms-extbase": "10.0.*@dev",
-        "typo3/cms-fluid": "10.0.*@dev",
         "hoa/compiler": "^3.0",
         "webmozart/assert": "^1.0",
         "webonyx/graphql-php": "^0.13"
@@ -68,6 +63,7 @@
             "TYPO3\\CMS\\Core\\Tests\\Functional\\GraphQL\\": "Tests/Functional/GraphQL/"
         }
     },
+    "minimum-stability": "dev",
     "scripts": {
         "build:package:link": [
             "TYPO3\\CMS\\Core\\GraphQL\\Build\\Composer\\ScriptHelper::linkPackage"

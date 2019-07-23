@@ -9,7 +9,6 @@ services:
   - mysql
   - postgresql
 
-
 addons:
   apt:
     packages:
