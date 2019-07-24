@@ -1,0 +1,43 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  TYPO3\CMS\GraphQL\:
+    resource: '../Classes/*'
+
+  TYPO3\CMS\GraphQL\Database\FilterArgumentProvider:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-filter'
+        event: TYPO3\CMS\GraphQL\Event\BeforeFieldArgumentsInitializationEvent
+
+  TYPO3\CMS\GraphQL\Database\OrderArgumentProvider:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-order'
+        event: TYPO3\CMS\GraphQL\Event\BeforeFieldArgumentsInitializationEvent
+
+  TYPO3\CMS\GraphQL\Database\FilterQueryHandler:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-filter'
+        event: TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent
+
+  TYPO3\CMS\GraphQL\Database\OrderQueryHandler:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-order'
+        event: TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent
+
+  TYPO3\CMS\GraphQL\Database\OrderValueHandler:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-order'
+        event: TYPO3\CMS\GraphQL\Event\AfterValueResolvingEvent

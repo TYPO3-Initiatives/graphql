@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace TYPO3\CMS\Core\GraphQL\Build\Composer;
+namespace TYPO3\CMS\GraphQL\Build\Composer;
 
 /*
  * This file is part of the TYPO3 CMS project.

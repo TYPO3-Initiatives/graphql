@@ -10,13 +10,9 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['gql'] = [
 
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['gql'] = [
     'resolver' => [
-        \TYPO3\CMS\Core\GraphQL\Database\ActiveRelationshipResolver::class,
-        \TYPO3\CMS\Core\GraphQL\Database\EntityResolver::class,
-        \TYPO3\CMS\Core\GraphQL\Database\PassiveManyToManyRelationshipResolver::class,
-        \TYPO3\CMS\Core\GraphQL\Database\PassiveOneToManyRelationshipResolver::class,
-    ],
-    'resolverHandler' => [
-        \TYPO3\CMS\Core\GraphQL\Database\QueryFilterHandler::class,
-        \TYPO3\CMS\Core\GraphQL\Database\QueryOrderHandler::class,
+        \TYPO3\CMS\GraphQL\Database\ActiveRelationshipResolver::class,
+        \TYPO3\CMS\GraphQL\Database\EntityResolver::class,
+        \TYPO3\CMS\GraphQL\Database\PassiveManyToManyRelationshipResolver::class,
+        \TYPO3\CMS\GraphQL\Database\PassiveOneToManyRelationshipResolver::class,
     ],
 ];

@@ -53,21 +53,21 @@
     },
     "autoload": {
         "psr-4": {
-            "TYPO3\\CMS\\Core\\GraphQL\\Build\\": "Build/",
-            "TYPO3\\CMS\\Core\\GraphQL\\": "Classes/GraphQL/"
+            "TYPO3\\CMS\\GraphQL\\Build\\": "Build/",
+            "TYPO3\\CMS\\GraphQL\\": "Classes/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "TYPO3\\CMS\\Core\\Tests\\Unit\\GraphQL\\": "Tests/Unit/GraphQL/",
-            "TYPO3\\CMS\\Core\\Tests\\Functional\\GraphQL\\": "Tests/Functional/GraphQL/"
+            "TYPO3\\CMS\\GraphQL\\Tests\\Unit\\": "Tests/Unit/",
+            "TYPO3\\CMS\\GraphQL\\Tests\\Functional\\": "Tests/Functional/"
         }
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
         "build:package:link": [
-            "TYPO3\\CMS\\Core\\GraphQL\\Build\\Composer\\ScriptHelper::linkPackage"
+            "TYPO3\\CMS\\GraphQL\\Build\\Composer\\ScriptHelper::linkPackage"
         ],
         "test:php:unit": [
             "@php .build/bin/phpunit -c Build/UnitTests.xml"
