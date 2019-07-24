@@ -20,6 +20,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use Hoa\Compiler\Llk\TreeNode;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Exception;
+use Doctrine\DBAL\Connection;
 
 /**
  * @internal
@@ -79,10 +80,12 @@ class FilterExpressionProcessor
             return $this->processComparison($node, $domain);
         } elseif ($this->isNegation($node)) {
             return $this->processNegation($node, $domain);
+        } elseif ($node->getId() === '#list') {
+            return $this->processList($node);
         }
 
         throw new Exception(
-            sprintf('Failed to process node in expression "%s"', $this->expression),
+            sprintf('Failed to process node type "%s" in filter expression', $node->getId()),
             1563841479
         );
     }
@@ -152,6 +155,18 @@ class FilterExpressionProcessor
         return $this->builder->createNamedParameter($node->getValueValue(), \PDO::PARAM_STR);
     }
 
+    protected function processList(TreeNode $node)
+    {
+        return $this->builder->createNamedParameter(
+            array_map(function (TreeNode $node) {
+                return $node->getValueToken() === 'string' 
+                    ? trim($node->getValueValue(), '`') : $node->getValueValue();
+            }, $node->getChildren()),
+            $node->getChild(0)->getValueToken() === 'int' 
+                ? Connection::PARAM_INT_ARRAY : Connection::PARAM_STR_ARRAY
+        );
+    }
+
     protected function processNone(TreeNode $node)
     {
         return 'NULL';
@@ -168,6 +183,7 @@ class FilterExpressionProcessor
             '#equals', '#not_equals',
             '#greater_than', '#less_than',
             '#greater_than_equals', '#less_than_equals',
+            '#in',
         ]);
     }
 

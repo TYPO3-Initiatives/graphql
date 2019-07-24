@@ -890,6 +890,61 @@ class EntityReaderTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
+                        filter: "uid in [1024, 1025, 1028]"
+                    ) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => 1025],
+                            ['uid' => 1024],
+                            ['uid' => 1028],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    tx_persistence_entity (
+                        filter: "scalar_string in [`String`]"
+                    ) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => 1027],
+                            ['uid' => 1024],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    tx_persistence_entity (
+                        filter: "scalar_float in [3.1415, -3.1415]"
+                    ) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => 1027],
+                            ['uid' => 1025],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    tx_persistence_entity (
                         filter: "scalar_float = 3.1415 or scalar_integer = 1"
                     ) {
                         uid
