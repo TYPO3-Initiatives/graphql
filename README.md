@@ -24,7 +24,7 @@ composer require typo3/cms-graphql
 The *entity reader* provides an easy access to the managed tables of TYPO3 CMS:
 
 ```php
-use TYPO3\CMS\Core\GraphQL;
+use TYPO3\CMS\GraphQL;
 
 $reader = new EntityReader();
 $result = $reader->execute('
