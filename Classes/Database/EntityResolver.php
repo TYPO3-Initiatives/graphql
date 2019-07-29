@@ -108,8 +108,8 @@ class EntityResolver extends AbstractResolver
     protected function getColumns(ResolveInfo $info, QueryBuilder $builder, string $table): array
     {
         return [
-            $builder->quoteIdentifier($table . '.uid') 
-                . ' AS ' . $builder->quoteIdentifier('__uid')
+            $builder->quoteIdentifier($table . '.uid')
+                . ' AS ' . $builder->quoteIdentifier('__uid'),
         ];
     }
 }

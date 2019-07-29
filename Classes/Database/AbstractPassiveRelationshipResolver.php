@@ -25,7 +25,6 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\AbstractRelationshipResolver;
 use TYPO3\CMS\GraphQL\EntitySchemaFactory;
-use TYPO3\CMS\GraphQL\ResolverHelper;
 use Webmozart\Assert\Assert;
 
 /**

@@ -120,7 +120,7 @@ class PassiveManyToManyRelationshipResolver extends AbstractPassiveRelationshipR
             $table,
             $this->getTable(),
             $this->getTable(),
-            (string)$builder->expr()->andX(
+            (string) $builder->expr()->andX(
                 $builder->expr()->eq(
                     $this->getTable() . '.uid_foreign',
                     $builder->quoteIdentifier($table . '.uid')

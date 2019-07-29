@@ -9,20 +9,20 @@ namespace TYPO3\CMS\GraphQL\Database;
  * It is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License, either version 2
  * of the License, or any later version.
-     
+
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  * The TYPO3 project - inspiring people to share!
  */
 
+use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\StringType;
+use SebastianBergmann\RecursionContext\Context;
+use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
 use TYPO3\CMS\GraphQL\ResolverHelper;
-use SebastianBergmann\RecursionContext\Context;
-use TYPO3\CMS\Core\Context\LanguageAspect;
-use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\StringType;
 
 /**
  * @internal
@@ -99,7 +99,7 @@ class FieldQueryHandler
                 ) . ',' . $emptyValue . '),';
             }
 
-            $expression .= $builder->quoteIdentifier($table . '.' . $field) . ',NULL) AS ' 
+            $expression .= $builder->quoteIdentifier($table . '.' . $field) . ',NULL) AS '
                 . $builder->quoteIdentifier($field);
 
             return $expression;

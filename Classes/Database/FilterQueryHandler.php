@@ -16,14 +16,14 @@ namespace TYPO3\CMS\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
+use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\StringType;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
-use GraphQL\Type\Definition\ResolveInfo;
-use TYPO3\CMS\Core\Exception;
-use GraphQL\Type\Definition\StringType;
 
 /**
  * @internal
@@ -58,16 +58,16 @@ class FilterQueryHandler
             $event->getInfo(),
             $builder,
             function (QueryBuilder $builder, string $operator, array ...$operands) use ($event) {
-                $operands = array_map(function($operand) use ($builder, $event) {
-                    return isset($operand['identifier']) 
+                $operands = array_map(function ($operand) use ($builder, $event) {
+                    return isset($operand['identifier'])
                         ? $this->getFieldExpression($operand['identifier'], $event->getInfo(), $builder)
                         : $builder->createNamedParameter($operand['value'], $operand['type']);
                 }, $operands);
 
                 if (count($operands) === 2) {
                     return $builder->expr()->comparison(
-                        $operands[0], 
-                        $operator, 
+                        $operands[0],
+                        $operator,
                         in_array($operator, ['IN', 'NOT IN']) ? '(' . $operands[1] . ')' : $operands[1]
                     );
                 } elseif (count($operands) === 1) {

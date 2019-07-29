@@ -16,13 +16,13 @@ namespace TYPO3\CMS\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Doctrine\DBAL\Connection;
+use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
+use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
-use Doctrine\DBAL\Connection;
 
 /**
  * @internal
@@ -85,7 +85,7 @@ class LocalizationQueryHandler
                         $table,
                         $table,
                         'language_overlay',
-                        (string)$builder->expr()->eq(
+                        (string) $builder->expr()->eq(
                             $table . '.uid',
                             $builder->quoteIdentifier('language_overlay.' . $translationSource)
                         )
@@ -97,7 +97,7 @@ class LocalizationQueryHandler
                         $table,
                         $table,
                         'language_overlay',
-                        (string)$builder->expr()->eq(
+                        (string) $builder->expr()->eq(
                             $table . '.uid',
                             $builder->quoteIdentifier('language_overlay.' . $translationSource)
                         )
@@ -109,7 +109,7 @@ class LocalizationQueryHandler
                         $table,
                         $table,
                         'language_overlay',
-                        (string)$builder->expr()->eq(
+                        (string) $builder->expr()->eq(
                             $table . '.uid',
                             $builder->quoteIdentifier('language_overlay.' . $translationSource)
                         )

@@ -16,11 +16,11 @@ namespace TYPO3\CMS\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Doctrine\DBAL\Connection;
 use GraphQL\Type\Definition\ResolveInfo;
 use Hoa\Compiler\Llk\TreeNode;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Exception;
-use Doctrine\DBAL\Connection;
 
 /**
  * @internal
@@ -104,7 +104,7 @@ class FilterExpressionProcessor
             [
                 $this->builder,
                 $operator,
-                $this->processField($left)
+                $this->processField($left),
             ]
         );
     }
@@ -135,7 +135,7 @@ class FilterExpressionProcessor
             array_merge(
                 [
                     $this->builder,
-                    self::COMPARISION[$node->getId()][$domain]
+                    self::COMPARISION[$node->getId()][$domain],
                 ],
                 $operands
             )
@@ -154,7 +154,7 @@ class FilterExpressionProcessor
         return [
             'identifier' => implode('.', array_map(function (TreeNode $node) {
                 return $node->getValueValue();
-            }, $path->getChildren()))
+            }, $path->getChildren())),
         ];
     }
 
@@ -170,7 +170,7 @@ class FilterExpressionProcessor
     {
         return [
             'value' => trim($node->getValueValue(), '`'),
-            'type' => \PDO::PARAM_STR
+            'type' => \PDO::PARAM_STR,
         ];
     }
 
@@ -194,10 +194,10 @@ class FilterExpressionProcessor
     {
         return [
             'value' => array_map(function (TreeNode $node) {
-                return $node->getValueToken() === 'string' 
+                return $node->getValueToken() === 'string'
                     ? trim($node->getValueValue(), '`') : $node->getValueValue();
             }, $node->getChildren()),
-            'type' => $node->getChild(0)->getValueToken() === 'int' 
+            'type' => $node->getChild(0)->getValueToken() === 'int'
                 ? Connection::PARAM_INT_ARRAY : Connection::PARAM_STR_ARRAY,
         ];
     }

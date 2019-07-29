@@ -30,7 +30,6 @@ use TYPO3\CMS\GraphQL\AbstractRelationshipResolver;
 use TYPO3\CMS\GraphQL\EntitySchemaFactory;
 use TYPO3\CMS\GraphQL\Event\AfterValueResolvingEvent;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
-use TYPO3\CMS\GraphQL\ResolverHelper;
 use Webmozart\Assert\Assert;
 
 /**
@@ -225,7 +224,7 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
         $foreignKeyField = $this->getForeignKeyField();
 
         if ($foreignKeyField) {
-            $columns[] = $builder->quoteIdentifier($table . '.' . $foreignKeyField) 
+            $columns[] = $builder->quoteIdentifier($table . '.' . $foreignKeyField)
                 . 'AS ' . $builder->quoteIdentifier('__' . $foreignKeyField);
         }
 
