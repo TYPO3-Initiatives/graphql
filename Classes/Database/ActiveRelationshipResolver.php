@@ -118,7 +118,7 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
         $tables = [];
 
         if (!$context['cache']->has($bufferIdentifier)) {
-            $foreignKeyField = $this->getForeignKeyField();
+            $foreignKeyField = '__' . $this->getForeignKeyField();
 
             foreach ($this->getPropertyDefinition()->getRelationTableNames() as $table) {
                 $builder = $this->getBuilder($info, $table, $keys);
@@ -222,22 +222,11 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
     {
         $columns = [];
 
-        foreach (ResolverHelper::getFields($info, $table) as $field) {
-            $columns[$field->name->value] = $builder->quoteIdentifier($table . '.' . $field->name->value);
-        }
-
-        foreach (ResolverHelper::getFields($info) as $field) {
-            if (isset($columns[$field->name->value])) {
-                continue;
-            }
-
-            $columns[] = 'NULL AS ' . $builder->quoteIdentifier($field->name->value);
-        }
-
         $foreignKeyField = $this->getForeignKeyField();
 
         if ($foreignKeyField) {
-            $columns[] = $builder->quoteIdentifier($foreignKeyField);
+            $columns[] = $builder->quoteIdentifier($table . '.' . $foreignKeyField) 
+                . 'AS ' . $builder->quoteIdentifier('__' . $foreignKeyField);
         }
 
         $columns[] = $builder->quote($table, ParameterType::STRING)

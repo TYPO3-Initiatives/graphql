@@ -45,8 +45,8 @@ abstract class AbstractPassiveRelationshipResolver extends AbstractRelationshipR
         $keys = $context['cache']->get($keysIdentifier) ?: [];
 
         if ($source !== null) {
-            Assert::keyExists($source, 'uid');
-            $keys[] = $source['uid'];
+            Assert::keyExists($source, '__uid');
+            $keys[] = $source['__uid'];
         }
 
         $context['cache']->set($keysIdentifier, $keys);
@@ -113,18 +113,6 @@ abstract class AbstractPassiveRelationshipResolver extends AbstractRelationshipR
     protected function getColumns(ResolveInfo $info, QueryBuilder $builder, string $table)
     {
         $columns = [];
-
-        foreach (ResolverHelper::getFields($info, $table) as $field) {
-            $columns[$field->name->value] = $builder->quoteIdentifier($table . '.' . $field->name->value);
-        }
-
-        foreach (ResolverHelper::getFields($info) as $field) {
-            if (isset($columns[$field->name->value])) {
-                continue;
-            }
-
-            $columns[] = 'NULL AS ' . $builder->quoteIdentifier($field->name->value);
-        }
 
         $columns[] = $builder->quote($table, ParameterType::STRING)
             . ' AS ' . $builder->quoteIdentifier(EntitySchemaFactory::ENTITY_TYPE_FIELD);

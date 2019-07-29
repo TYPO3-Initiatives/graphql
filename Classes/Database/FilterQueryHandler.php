@@ -21,6 +21,9 @@ use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
+use GraphQL\Type\Definition\ResolveInfo;
+use TYPO3\CMS\Core\Exception;
+use GraphQL\Type\Definition\StringType;
 
 /**
  * @internal
@@ -49,19 +52,62 @@ class FilterQueryHandler
 
         $arguments = $event->getArguments();
         $builder = $context['builder'];
-        $expression = $arguments[FilterArgumentProvider::ARGUMENT_NAME] ?? null;
         
         $processor = GeneralUtility::makeInstance(
             FilterExpressionProcessor::class,
             $event->getInfo(),
-            $expression,
-            $builder
+            $builder,
+            function (QueryBuilder $builder, string $operator, array ...$operands) use ($event) {
+                $operands = array_map(function($operand) use ($builder, $event) {
+                    return isset($operand['identifier']) 
+                        ? $this->getFieldExpression($operand['identifier'], $event->getInfo(), $builder)
+                        : $builder->createNamedParameter($operand['value'], $operand['type']);
+                }, $operands);
+
+                if (count($operands) === 2) {
+                    return $builder->expr()->comparison(
+                        $operands[0], 
+                        $operator, 
+                        in_array($operator, ['IN', 'NOT IN']) ? '(' . $operands[1] . ')' : $operands[1]
+                    );
+                } elseif (count($operands) === 1) {
+                    return $operands[0] . ' ' . $operator;
+                }
+
+                throw new Exception('Unexpected filter expression leaf', 1564352799);
+            }
         );
 
-        $condition = $processor->process();
+        $condition = $processor->process($arguments[FilterArgumentProvider::ARGUMENT_NAME] ?? null);
 
         if ($condition !== null) {
             $builder->andWhere($condition);
         }
+    }
+
+    protected function getFieldExpression(string $field, ResolveInfo $info, QueryBuilder $builder): string
+    {
+        $table = array_pop(QueryHelper::getQueriedTables($builder, QueryHelper::QUERY_PART_FROM));
+        $joinTables = QueryHelper::getQueriedTables($builder, QueryHelper::QUERY_PART_JOIN);
+        $languageOverlayTables = QueryHelper::filterLanguageOverlayTables($joinTables);
+
+        if (count($languageOverlayTables) > 0) {
+            $type = $info->schema->getType($table)->getField($field)->type;
+            $emptyValue = $type instanceof StringType ? '\'\'' : '0';
+
+            $expression = 'COALESCE(';
+
+            foreach ($languageOverlayTables as $languageOverlayTableAlias => $languageOverlayTable) {
+                $expression .= 'NULLIF(' . $builder->quoteIdentifier(
+                    $languageOverlayTableAlias . '.' . $field
+                ) . ',' . $emptyValue . '),';
+            }
+
+            $expression .= $builder->quoteIdentifier($table . '.' . $field) . ',NULL)';
+
+            return $expression;
+        }
+
+        return $builder->quoteIdentifier($table . '.' . $field);
     }
 }

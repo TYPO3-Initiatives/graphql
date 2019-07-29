@@ -94,7 +94,7 @@ class EntityResolver extends AbstractResolver
         $builder->getRestrictions()
             ->removeAll();
 
-        $builder->select(...$this->getColumns($info))
+        $builder->selectLiteral(...$this->getColumns($info, $builder, $table))
             ->from($table);
 
         return $builder;
@@ -105,16 +105,11 @@ class EntityResolver extends AbstractResolver
         return $this->entityDefinition->getName();
     }
 
-    protected function getColumns(ResolveInfo $info): array
+    protected function getColumns(ResolveInfo $info, QueryBuilder $builder, string $table): array
     {
-        $columns = ['uid'];
-
-        foreach ($info->fieldNodes[0]->selectionSet->selections as $selection) {
-            if ($selection->kind === 'Field' && $selection->name->value !== 'uid') {
-                $columns[] = $selection->name->value;
-            }
-        }
-
-        return $columns;
+        return [
+            $builder->quoteIdentifier($table . '.uid') 
+                . ' AS ' . $builder->quoteIdentifier('__uid')
+        ];
     }
 }

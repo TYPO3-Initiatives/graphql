@@ -56,9 +56,7 @@ ternary:
   | field() ::not_equals:: #not_equals ( field() | parameter() | scalar() )
   | ( field() | parameter() | scalar() ) ::not_equals:: #not_equals field()
   | field() ::in:: #in ( list() | parameter() )
-  | ( list() | parameter() ) ::in:: #in field()
   | field() ::match:: #match ( <string> | parameter() )
-  | ( <string> | parameter() ) ::match:: #match field()
 
 #field:
     path() constraint()?

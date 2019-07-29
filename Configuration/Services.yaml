@@ -21,12 +21,27 @@ services:
         identifier: 'entity-query-order'
         event: TYPO3\CMS\GraphQL\Event\BeforeFieldArgumentsInitializationEvent
 
+  TYPO3\CMS\GraphQL\Database\FieldQueryHandler:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-field'
+        event: TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent
+
   TYPO3\CMS\GraphQL\Database\FilterQueryHandler:
     tags:
       -
         name: event.listener
         identifier: 'entity-query-filter'
         event: TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent
+
+  TYPO3\CMS\GraphQL\Database\LocalizationQueryHandler:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-localization'
+        event: TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent
+        before: 'entity-query-filter, entity-query-field, entity-query-order'
 
   TYPO3\CMS\GraphQL\Database\OrderQueryHandler:
     tags:

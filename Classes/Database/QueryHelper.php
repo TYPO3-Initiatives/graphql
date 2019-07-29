@@ -18,6 +18,7 @@ namespace TYPO3\CMS\GraphQL\Database;
 
 use Doctrine\DBAL\Platforms\SQLServerPlatform;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
+use TYPO3\CMS\Core\Utility\StringUtility;
 
 /**
  * @internal
@@ -92,5 +93,16 @@ class QueryHelper
         }
  
         return $identifier;
+    }
+
+    public static function filterLanguageOverlayTables(array $tables)
+    {
+        $tables = array_filter($tables, function ($tableAlias) {
+            return StringUtility::beginsWith($tableAlias, 'language_overlay');
+        }, ARRAY_FILTER_USE_KEY);
+
+        ksort($tables);
+
+        return $tables;
     }
 }

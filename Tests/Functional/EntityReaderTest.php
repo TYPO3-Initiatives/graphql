@@ -22,6 +22,7 @@ use TYPO3\CMS\GraphQL\EntityReader;
 use TYPO3\CMS\GraphQL\Exception\NotSupportedException;
 use TYPO3\CMS\GraphQL\Exception\SchemaException;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
+use TYPO3\CMS\Core\Context\LanguageAspect;
 
 /**
  * Test case
@@ -94,6 +95,10 @@ class EntityReaderTest extends FunctionalTestCase
                             ['title' => 'Page 1'],
                             ['title' => 'Page 1.1'],
                             ['title' => 'Page 1.2'],
+                            ['title' => 'Seite 1'],
+                            ['title' => 'Seite 1.1'],
+                            ['title' => 'Seite 2'],
+                            ['title' => 'Seite 3'],
                         ],
                     ],
                 ],
@@ -945,7 +950,7 @@ class EntityReaderTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "scalar_float = 3.1415 or scalar_integer = 1"
+                        filter: "scalar_float >= 3.1415 or 1 = scalar_integer"
                     ) {
                         uid
                     }
@@ -964,7 +969,7 @@ class EntityReaderTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "scalar_float = -3.1415 or scalar_float = 3.1415 and l10n_state = null"
+                        filter: "scalar_float = -3.1415 or scalar_float = 3.1415 and null = l10n_state"
                     ) {
                         uid
                     }
@@ -982,7 +987,7 @@ class EntityReaderTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "scalar_text = `` and not (scalar_float = -3.1415 or scalar_integer = null)"
+                        filter: "scalar_text = `` and not (scalar_float <= -3.1415 or scalar_integer = null)"
                     ) {
                         uid
                     }
@@ -1001,7 +1006,7 @@ class EntityReaderTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "not not not not (scalar_float = -3.1415 or scalar_string = `String`)"
+                        filter: "not not not not (scalar_float <= -3.1415 or scalar_string = `String`)"
                     ) {
                         uid
                     }
@@ -1019,7 +1024,7 @@ class EntityReaderTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "not not not (scalar_float = -3.1415 or scalar_string = `String`)"
+                        filter: "not not not (scalar_float <= -3.1415 or scalar_string = `String`)"
                     ) {
                         uid
                     }
@@ -1031,6 +1036,60 @@ class EntityReaderTest extends FunctionalTestCase
                             ['uid' => 1025],
                             ['uid' => 1026],
                             ['uid' => 1028],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    tx_persistence_entity (
+                        filter: "3 < scalar_float"
+                    ) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => 1025],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    tx_persistence_entity (
+                        filter: "not 3 < scalar_float"
+                    ) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => 1027],
+                            ['uid' => 1024],
+                            ['uid' => 1026],
+                            ['uid' => 1028],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    tx_persistence_entity (
+                        filter: "-3 > scalar_float"
+                    ) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => 1027],
                         ],
                     ],
                 ],
@@ -1051,17 +1110,163 @@ class EntityReaderTest extends FunctionalTestCase
 
     public function contextRestrictedQueryProvider()
     {
-        return [];
+        return [
+            [
+                '{
+                    pages {
+                        title
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_OFF, []),
+                ],
+                [
+                    'data' => [
+                        'pages' => [
+                            ['title' => 'Seite 2'],
+                            ['title' => 'Seite 3'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages {
+                        title
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_MIXED, []),
+                ],
+                [
+                    'data' => [
+                        'pages' => [
+                            ['title' => 'Seite 1'],
+                            ['title' => 'Seite 1.1'],
+                            ['title' => 'Page 1.2'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages {
+                        title
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON, []),
+                ],
+                [
+                    'data' => [
+                        'pages' => [
+                            ['title' => 'Seite 1'],
+                            ['title' => 'Seite 1.1'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages {
+                        title
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON_WITH_FLOATING, []),
+                ],
+                [
+                    'data' => [
+                        'pages' => [
+                            ['title' => 'Seite 1'],
+                            ['title' => 'Seite 1.1'],
+                            ['title' => 'Seite 2'],
+                            ['title' => 'Seite 3'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages(filter: "title = `Seite 2`") {
+                        title
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_OFF, []),
+                ],
+                [
+                    'data' => [
+                        'pages' => [
+                            ['title' => 'Seite 2'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages(filter: "title in [`Seite 1.1`, `Page 1.2`]") {
+                        title
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_MIXED, []),
+                ],
+                [
+                    'data' => [
+                        'pages' => [
+                            ['title' => 'Seite 1.1'],
+                            ['title' => 'Page 1.2'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages(filter: "title != `Seite 1.1`") {
+                        title
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON, []),
+                ],
+                [
+                    'data' => [
+                        'pages' => [
+                            ['title' => 'Seite 1'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages(filter: "`Seite 1` = title or `Seite 3` = title") {
+                        title
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON_WITH_FLOATING, []),
+                ],
+                [
+                    'data' => [
+                        'pages' => [
+                            ['title' => 'Seite 1'],
+                            ['title' => 'Seite 3'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**
      * @test
      * @dataProvider contextRestrictedQueryProvider
      */
-    public function readContextRestricted(string $query, Context $context, array $expected)
+    public function readContextRestricted(string $query, array $aspects, array $expected)
     {
         $reader = new EntityReader();
-        $result = $reader->execute($query, [], $context);
+        $result = $reader->execute($query, [], new Context($aspects));
         $this->assertEquals($expected, $result);
     }
 

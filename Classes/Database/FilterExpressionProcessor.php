@@ -31,16 +31,20 @@ class FilterExpressionProcessor
     /**
      * @var array
      */
-    protected const OPERATOR_MAPPING = [
+    protected const CONNECTIVE = [
         '#and' => ['andX', 'orX'],
         '#or' => ['orX', 'andX'],
-        '#in' => ['in', 'notIn'],
-        '#equals' => ['eq', 'neq'],
-        '#not_equals' => ['neq', 'eq'],
-        '#less_than' => ['lt', 'gte'],
-        '#greater_than' => ['gt', 'lte'],
-        '#greater_than_equals' => ['gte', 'lt'],
-        '#less_than_equals' => ['lte', 'gt'],
+        
+    ];
+
+    protected const COMPARISION = [
+        '#in' => ['IN', 'NOT IN'],
+        '#equals' => ['=', '<>'],
+        '#not_equals' => ['<>', '='],
+        '#less_than' => ['<', '>='],
+        '#greater_than' => ['>', '<='],
+        '#greater_than_equals' => ['>=', '<'],
+        '#less_than_equals' => ['<=', '>'],
     ];
 
     /**
@@ -54,28 +58,28 @@ class FilterExpressionProcessor
     protected $builder;
 
     /**
-     * @var TreeNode
+     * @var callable
      */
-    protected $expression;
+    protected $handler;
 
-    public function __construct(ResolveInfo $info, ?TreeNode $expression, QueryBuilder $builder)
+    public function __construct(ResolveInfo $info, QueryBuilder $builder, callable $handler)
     {
         $this->info = $info;
         $this->builder = $builder;
-        $this->expression = $expression;
+        $this->handler = $handler;
     }
 
-    public function process()
+    public function process(?TreeNode $expression)
     {
-        return $this->expression !== null ? $this->processNode($this->expression->getChild(0)) : null;
+        return $expression !== null ? $this->processNode($expression->getChild(0)) : null;
     }
 
     protected function processNode(TreeNode $node, int $domain = 0)
     {
         if ($this->isNullComparison($node)) {
             return $this->processNullComparison($node, $domain);
-        } elseif ($this->isBinaryLogicalOperation($node)) {
-            return $this->processBinaryLogicalOperation($node, $domain);
+        } elseif ($this->isConnective($node)) {
+            return $this->processConnective($node, $domain);
         } elseif ($this->isComparison($node)) {
             return $this->processComparison($node, $domain);
         } elseif ($this->isNegation($node)) {
@@ -92,19 +96,26 @@ class FilterExpressionProcessor
 
     protected function processNullComparison(TreeNode $node, int $domain)
     {
-        $field = $node->getChild(0)->isToken() ? $node->getChild(1) : $node->getChild(0);
-        $operation = ($node->getId() === '#equals' xor $domain === 0) ? 'isNotNull' : 'isNull';
+        $operator = ($node->getId() === '#equals' xor $domain === 0) ? 'IS NOT NULL' : 'IS NULL';
+        $left = $node->getChild($node->getChild(0)->isToken() ? 1 : 0);
 
-        return $this->builder->expr()->{$operation}($this->processField($field));
+        return call_user_func_array(
+            $this->handler,
+            [
+                $this->builder,
+                $operator,
+                $this->processField($left)
+            ]
+        );
     }
 
-    protected function processBinaryLogicalOperation(TreeNode $node, int $domain)
+    protected function processConnective(TreeNode $node, int $domain)
     {
         $left = $node->getChild(0);
         $right = $node->getChild(1);
-        $operation = self::OPERATOR_MAPPING[$node->getId()][$domain];
+        $operator = self::CONNECTIVE[$node->getId()][$domain];
 
-        return $this->builder->expr()->{$operation}(
+        return $this->builder->expr()->{$operator}(
             $this->{'process' . $this->getType($left)}($left, $domain),
             $this->{'process' . $this->getType($right)}($right, $domain)
         );
@@ -112,12 +123,22 @@ class FilterExpressionProcessor
 
     protected function processComparison(TreeNode $node, int $domain)
     {
-        $field = $node->getChild($node->getChild(0)->getId() === '#field' ? 0 : 1);
-        $any = $node->getChild($node->getChild(0)->getId() !== '#field' ? 0 : 1);
+        $operands = [];
+        
+        foreach ($node->getChildren() as $operand) {
+            $operands[] = $operand->getId() === '#field' ? $this->processField($operand)
+                : $this->{'process' . $this->getType($operand)}($operand);
+        }
 
-        return $this->builder->expr()->{self::OPERATOR_MAPPING[$node->getId()][$domain]}(
-            $this->processField($field),
-            $this->{'process' . $this->getType($any)}($any)
+        return call_user_func_array(
+            $this->handler,
+            array_merge(
+                [
+                    $this->builder,
+                    self::COMPARISION[$node->getId()][$domain]
+                ],
+                $operands
+            )
         );
     }
 
@@ -126,53 +147,70 @@ class FilterExpressionProcessor
         return $this->processNode($node->getChildren()[0], ++$domain%2);
     }
 
-    protected function processField(TreeNode $node)
+    protected function processField(TreeNode $node): array
     {
         $path = $node->getChild($node->getChild(0)->getId() === '#path' ? 0 : 1);
 
-        return implode('.', array_map(function (TreeNode $node) {
-            return $node->getValueValue();
-        }, $path->getChildren()));
+        return [
+            'identifier' => implode('.', array_map(function (TreeNode $node) {
+                return $node->getValueValue();
+            }, $path->getChildren()))
+        ];
     }
 
-    protected function processInteger(TreeNode $node)
+    protected function processInteger(TreeNode $node): array
     {
-        return $this->builder->createNamedParameter($node->getValueValue(), \PDO::PARAM_INT);
+        return [
+            'value' => $node->getValueValue(),
+            'type' => \PDO::PARAM_INT,
+        ];
     }
 
-    protected function processString(TreeNode $node)
+    protected function processString(TreeNode $node): array
     {
-        return $this->builder->createNamedParameter(trim($node->getValueValue(), '`'), \PDO::PARAM_STR);
+        return [
+            'value' => trim($node->getValueValue(), '`'),
+            'type' => \PDO::PARAM_STR
+        ];
     }
 
-    protected function processBoolean(TreeNode $node)
+    protected function processBoolean(TreeNode $node): array
     {
-        return $this->builder->createNamedParameter($node->getValueValue(), \PDO::PARAM_BOOL);
+        return [
+            'value' => $node->getValueValue(),
+            'type' => \PDO::PARAM_BOOL,
+        ];
     }
 
-    protected function processFloat(TreeNode $node)
+    protected function processFloat(TreeNode $node): array
     {
-        return $this->builder->createNamedParameter($node->getValueValue(), \PDO::PARAM_STR);
+        return [
+            'value' => $node->getValueValue(),
+            'type' => \PDO::PARAM_STR,
+        ];
     }
 
-    protected function processList(TreeNode $node)
+    protected function processList(TreeNode $node): array
     {
-        return $this->builder->createNamedParameter(
-            array_map(function (TreeNode $node) {
+        return [
+            'value' => array_map(function (TreeNode $node) {
                 return $node->getValueToken() === 'string' 
                     ? trim($node->getValueValue(), '`') : $node->getValueValue();
             }, $node->getChildren()),
-            $node->getChild(0)->getValueToken() === 'int' 
-                ? Connection::PARAM_INT_ARRAY : Connection::PARAM_STR_ARRAY
-        );
+            'type' => $node->getChild(0)->getValueToken() === 'int' 
+                ? Connection::PARAM_INT_ARRAY : Connection::PARAM_STR_ARRAY,
+        ];
     }
 
-    protected function processNone(TreeNode $node)
+    protected function processNone(TreeNode $node): array
     {
-        return 'NULL';
+        return [
+            'value' => null,
+            'type' => \PDO::PARAM_NULL,
+        ];
     }
 
-    protected function isBinaryLogicalOperation(TreeNode $node)
+    protected function isConnective(TreeNode $node)
     {
         return !$node->isToken() && ($node->getId() === '#and' || $node->getId() === '#or');
     }

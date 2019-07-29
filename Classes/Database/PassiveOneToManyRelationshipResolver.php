@@ -104,7 +104,7 @@ class PassiveOneToManyRelationshipResolver extends AbstractPassiveRelationshipRe
             $context['cache']->set($bufferIdentifier, $buffer);
         }
 
-        return $this->getValue($buffer[$source['uid']]);
+        return $this->getValue($buffer[$source['__uid']]);
     }
 
     protected function getBufferIndexes(array $row): array
