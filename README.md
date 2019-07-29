@@ -36,7 +36,7 @@ $result = $reader->execute('
 ');
 ```
 
-For more examples checkout the [functional tests](Tests/Functional/GraphQL/EntityReaderTest.php).
+For more examples checkout the [functional tests](Tests/Functional/EntityReaderTest.php).
 
 ## Development
 
