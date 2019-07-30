@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace TYPO3\CMS\GraphQL\Tests\Functional;
+namespace TYPO3\CMS\GraphQL\Tests\Functional\EntityReader;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -17,30 +17,28 @@ namespace TYPO3\CMS\GraphQL\Tests\Functional;
  */
 
 use Exception;
-use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\GraphQL\EntityReader;
 use TYPO3\CMS\GraphQL\Exception\NotSupportedException;
 use TYPO3\CMS\GraphQL\Exception\SchemaException;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
-use TYPO3\CMS\Core\Context\LanguageAspect;
 
 /**
  * Test case
  */
-class EntityReaderTest extends FunctionalTestCase
+class LiveDefaultTest extends FunctionalTestCase
 {
     /**
      * @var array
      */
     protected $testExtensionsToLoad = [
         'typo3/sysext/graphql',
-        'typo3/sysext/graphql/Tests/Functional/Fixtures/Extensions/persistence',
+        'typo3/sysext/graphql/Tests/Functional/EntityReader/Extensions/persistence',
     ];
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->importCSVDataSet(__DIR__ . '/Fixtures/DataSet/LiveDefaultEntities.csv');
+        $this->importDataSet(__DIR__ . '/Fixtures/live-default.xml');
     }
 
     public function scalarPropertyQueryProvider()
@@ -95,10 +93,6 @@ class EntityReaderTest extends FunctionalTestCase
                             ['title' => 'Page 1'],
                             ['title' => 'Page 1.1'],
                             ['title' => 'Page 1.2'],
-                            ['title' => 'Seite 1'],
-                            ['title' => 'Seite 1.1'],
-                            ['title' => 'Seite 2'],
-                            ['title' => 'Seite 3'],
                         ],
                     ],
                 ],
@@ -1105,168 +1099,6 @@ class EntityReaderTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query, $bindings);
-        $this->assertEquals($expected, $result);
-    }
-
-    public function contextRestrictedQueryProvider()
-    {
-        return [
-            [
-                '{
-                    pages {
-                        title
-                    }
-                }',
-                [
-                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_OFF, []),
-                ],
-                [
-                    'data' => [
-                        'pages' => [
-                            ['title' => 'Seite 2'],
-                            ['title' => 'Seite 3'],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                '{
-                    pages {
-                        title
-                    }
-                }',
-                [
-                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_MIXED, []),
-                ],
-                [
-                    'data' => [
-                        'pages' => [
-                            ['title' => 'Seite 1'],
-                            ['title' => 'Seite 1.1'],
-                            ['title' => 'Page 1.2'],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                '{
-                    pages {
-                        title
-                    }
-                }',
-                [
-                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON, []),
-                ],
-                [
-                    'data' => [
-                        'pages' => [
-                            ['title' => 'Seite 1'],
-                            ['title' => 'Seite 1.1'],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                '{
-                    pages {
-                        title
-                    }
-                }',
-                [
-                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON_WITH_FLOATING, []),
-                ],
-                [
-                    'data' => [
-                        'pages' => [
-                            ['title' => 'Seite 1'],
-                            ['title' => 'Seite 1.1'],
-                            ['title' => 'Seite 2'],
-                            ['title' => 'Seite 3'],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                '{
-                    pages(filter: "title = `Seite 2`") {
-                        title
-                    }
-                }',
-                [
-                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_OFF, []),
-                ],
-                [
-                    'data' => [
-                        'pages' => [
-                            ['title' => 'Seite 2'],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                '{
-                    pages(filter: "title in [`Seite 1.1`, `Page 1.2`]") {
-                        title
-                    }
-                }',
-                [
-                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_MIXED, []),
-                ],
-                [
-                    'data' => [
-                        'pages' => [
-                            ['title' => 'Seite 1.1'],
-                            ['title' => 'Page 1.2'],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                '{
-                    pages(filter: "title != `Seite 1.1`") {
-                        title
-                    }
-                }',
-                [
-                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON, []),
-                ],
-                [
-                    'data' => [
-                        'pages' => [
-                            ['title' => 'Seite 1'],
-                        ],
-                    ],
-                ],
-            ],
-            [
-                '{
-                    pages(filter: "`Seite 1` = title or `Seite 3` = title") {
-                        title
-                    }
-                }',
-                [
-                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON_WITH_FLOATING, []),
-                ],
-                [
-                    'data' => [
-                        'pages' => [
-                            ['title' => 'Seite 1'],
-                            ['title' => 'Seite 3'],
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * @test
-     * @dataProvider contextRestrictedQueryProvider
-     */
-    public function readContextRestricted(string $query, array $aspects, array $expected)
-    {
-        $reader = new EntityReader();
-        $result = $reader->execute($query, [], new Context($aspects));
         $this->assertEquals($expected, $result);
     }
 

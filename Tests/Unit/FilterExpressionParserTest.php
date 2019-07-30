@@ -150,7 +150,7 @@ class FilterExpressionParserTest extends UnitTestCase
                 ],
             ],
             [
-                'foo.bar != `:`',
+                'foo.bar != ` not in and or match `',
                 [
                     'id' => '#not_equals',
                     'children' => [
@@ -166,7 +166,7 @@ class FilterExpressionParserTest extends UnitTestCase
                                 ],
                             ],
                         ],
-                        ['string', '`:`'],
+                        ['string', '` not in and or match `'],
                     ],
                 ],
             ],

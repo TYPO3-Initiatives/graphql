@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataset>
+	<sys_language>
+		<uid>1</uid>
+		<pid>0</pid>
+		<title>Dansk</title>
+		<flag>dk</flag>
+	</sys_language>
+	<sys_language>
+		<uid>2</uid>
+		<pid>0</pid>
+		<title>Deutsch</title>
+		<flag>de</flag>
+	</sys_language>
+	<pages>
+		<uid>131</uid>
+		<pid>0</pid>
+		<sorting>1024</sorting>
+		<sys_language_uid>2</sys_language_uid>
+		<l10n_source>128</l10n_source>
+		<title>Seite 1</title>
+	</pages>
+	<pages>
+		<uid>132</uid>
+		<pid>128</pid>
+		<sorting>1280</sorting>
+		<sys_language_uid>2</sys_language_uid>
+		<l10n_source>129</l10n_source>
+		<title>Seite 1.1</title>
+	</pages>
+	<pages>
+		<uid>133</uid>
+		<pid>0</pid>
+		<sorting>1536</sorting>
+		<sys_language_uid>2</sys_language_uid>
+		<title>Seite 2</title>
+	</pages>
+	<pages>
+		<uid>134</uid>
+		<pid>0</pid>
+		<sorting>1792</sorting>
+		<sys_language_uid>2</sys_language_uid>
+		<title>Seite 3</title>
+	</pages>
+	<tx_persistence_entity>
+		<uid>1029</uid>
+		<pid>128</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<l10n_parent>1024</l10n_parent>
+		<title>Entität 1</title>
+		<scalar_string>Zeichenkette</scalar_string>
+	</tx_persistence_entity>
+	<tx_persistence_entity>
+		<uid>1030</uid>
+		<pid>128</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<l10n_parent>1025</l10n_parent>
+		<title>Entität 2</title>
+		<scalar_float>3.14</scalar_float>
+		<relation_select_1n_page>131</relation_select_1n_page>
+	</tx_persistence_entity>
+	<tx_persistence_entity>
+		<uid>1031</uid>
+		<pid>128</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<l10n_parent>1026</l10n_parent>
+		<title>Entität 3</title>
+		<scalar_float>0</scalar_float>
+		<scalar_integer>1</scalar_integer>
+		<scalar_text></scalar_text>
+		<relation_group_1n_content_page>pages_133,pages_134</relation_group_1n_content_page>
+	</tx_persistence_entity>
+	<tx_persistence_entity>
+		<uid>1032</uid>
+		<pid>128</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<l10n_parent>1027</l10n_parent>
+		<title>Entität 4</title>
+		<scalar_string>Zeichenkette</scalar_string>
+		<scalar_float>-3.14</scalar_float>
+	</tx_persistence_entity>
+	<tx_persistence_entity>
+		<uid>1033</uid>
+		<pid>128</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<l10n_parent>1028</l10n_parent>
+		<title>Entität 5</title>
+	</tx_persistence_entity>
+</dataset>
