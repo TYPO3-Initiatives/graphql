@@ -41,9 +41,8 @@ class FieldQueryHandler
         $columns = [];
 
         foreach (ResolverHelper::getFields($event->getInfo(), $table) as $field) {
-            $columns[$field->name->value] = $this->getFieldExpression(
-                $field->name->value, $event->getInfo(), $builder
-            );
+            $columns[$field->name->value] = $builder->quoteIdentifier($table . '.' . $field->name->value) 
+                . ' AS ' . $builder->quoteIdentifier($field->name->value);
         }
 
         foreach (ResolverHelper::getFields($event->getInfo()) as $field) {
@@ -59,17 +58,6 @@ class FieldQueryHandler
         }
     }
 
-    protected function getLanguageAspect($event): ?LanguageAspect
-    {
-        $context = $event->getContext();
-
-        if (isset($context['context']) && $context['context'] instanceof Context) {
-            return $context['context']->getAspect('language');
-        }
-
-        return null;
-    }
-
     protected function getQueryBuilder($event): ?QueryBuilder
     {
         $context = $event->getContext();
@@ -79,32 +67,5 @@ class FieldQueryHandler
         }
 
         return null;
-    }
-
-    protected function getFieldExpression(string $field, ResolveInfo $info, QueryBuilder $builder): string
-    {
-        $table = array_pop(QueryHelper::getQueriedTables($builder, QueryHelper::QUERY_PART_FROM));
-        $joinTables = QueryHelper::getQueriedTables($builder, QueryHelper::QUERY_PART_JOIN);
-        $languageOverlayTables = QueryHelper::filterLanguageOverlayTables($joinTables);
-
-        if (count($languageOverlayTables) > 0) {
-            $type = $info->schema->getType($table)->getField($field)->type;
-            $emptyValue = $type instanceof StringType ? '\'\'' : '0';
-
-            $expression = 'COALESCE(';
-
-            foreach ($languageOverlayTables as $languageOverlayTableAlias => $languageOverlayTable) {
-                $expression .= 'NULLIF(' . $builder->quoteIdentifier(
-                    $languageOverlayTableAlias . '.' . $field
-                ) . ',' . $emptyValue . '),';
-            }
-
-            $expression .= $builder->quoteIdentifier($table . '.' . $field) . ',NULL) AS '
-                . $builder->quoteIdentifier($field);
-
-            return $expression;
-        }
-
-        return $builder->quoteIdentifier($table . '.' . $field);
     }
 }

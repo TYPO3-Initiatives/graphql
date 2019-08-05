@@ -18,7 +18,6 @@ namespace TYPO3\CMS\GraphQL\Database;
 
 use Doctrine\DBAL\Connection;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
-use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -45,7 +44,7 @@ class LocalizationQueryHandler
 
         $meta = $type->config['meta'];
         
-        if (!$meta instanceof PropertyDefinition && !$meta instanceof EntityDefinition) {
+        if (!$meta instanceof EntityDefinition) {
             return;
         }
 
@@ -57,28 +56,35 @@ class LocalizationQueryHandler
 
         $table = array_pop($tables);
 
-        if (!isset($GLOBALS['TCA'][$table]['ctrl']['languageField'])) {
+        if (!isset($GLOBALS['TCA'][$table]['ctrl']['languageField'])
+            || !isset($GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'])
+        ) {
             return;
         }
 
         $languageField = $GLOBALS['TCA'][$table]['ctrl']['languageField'];
-        $translationSource = $GLOBALS['TCA'][$table]['ctrl']['translationSource'];
+        $translationParent = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'];
         $languageAspect = $this->getLanguageAspect($event);
-        $languages = [-1];
 
         if ($languageAspect !== null && $languageAspect->getContentId() > 0) {
             switch ($languageAspect->getOverlayType()) {
                 case LanguageAspect::OVERLAYS_OFF:
                     $builder->andWhere(
+                        $builder->expr()->in(
+                            $table . '.' . $languageField,
+                            $builder->createNamedParameter(
+                                [-1, $languageAspect->getContentId()],
+                                Connection::PARAM_INT_ARRAY
+                            )
+                        ),
                         $builder->expr()->eq(
-                            $table . '.' . $translationSource,
+                            $table . '.' . $translationParent,
                             $builder->createNamedParameter(
                                 0,
                                 \PDO::PARAM_INT
                             )
                         )
                     );
-                    $languages[] = $languageAspect->getContentId();
                     break;
                 case LanguageAspect::OVERLAYS_MIXED:
                     $builder->leftJoin(
@@ -87,49 +93,85 @@ class LocalizationQueryHandler
                         'language_overlay',
                         (string) $builder->expr()->eq(
                             $table . '.uid',
-                            $builder->quoteIdentifier('language_overlay.' . $translationSource)
+                            $builder->quoteIdentifier('language_overlay.' . $translationParent)
+                        )
+                    )->andWhere(
+                        $builder->expr()->orX(
+                            $builder->expr()->andX(
+                                $builder->expr()->neq(
+                                    $table . '.' . $translationParent,
+                                    $builder->createNamedParameter(
+                                        0,
+                                        \PDO::PARAM_INT
+                                    )
+                                ),
+                                $builder->expr()->eq(
+                                    $table . '.' . $languageField,
+                                    $builder->createNamedParameter(
+                                        $languageAspect->getContentId(),
+                                        \PDO::PARAM_INT
+                                    )
+                                )
+                            ),
+                            $builder->expr()->in(
+                                $table . '.' . $languageField,
+                                $builder->createNamedParameter(
+                                    [-1, 0],
+                                    Connection::PARAM_INT_ARRAY
+                                )
+                            )
+                        ),
+                        $builder->expr()->isNull(
+                            'language_overlay.uid'
                         )
                     );
-                    $languages[] = 0;
                     break;
                 case LanguageAspect::OVERLAYS_ON:
-                    $builder->innerJoin(
-                        $table,
-                        $table,
-                        'language_overlay',
-                        (string) $builder->expr()->eq(
-                            $table . '.uid',
-                            $builder->quoteIdentifier('language_overlay.' . $translationSource)
+                    $builder->orWhere(
+                        $builder->expr()->eq(
+                            $table . '.' . $languageField,
+                            $builder->createNamedParameter(
+                                -1,
+                                \PDO::PARAM_INT
+                            )
+                        ),
+                        $builder->expr()->andX(
+                            $builder->expr()->eq(
+                                $table . '.' . $languageField,
+                                $builder->createNamedParameter(
+                                    $languageAspect->getContentId(),
+                                    \PDO::PARAM_INT
+                                )
+                            ),
+                            $builder->expr()->neq(
+                                $table . '.' . $translationParent,
+                                $builder->createNamedParameter(
+                                    0,
+                                    \PDO::PARAM_INT
+                                )
+                            )
                         )
                     );
                     $languages[] = 0;
                     break;
                 case LanguageAspect::OVERLAYS_ON_WITH_FLOATING:
-                    $builder->leftJoin(
-                        $table,
-                        $table,
-                        'language_overlay',
-                        (string) $builder->expr()->eq(
-                            $table . '.uid',
-                            $builder->quoteIdentifier('language_overlay.' . $translationSource)
+                    $builder->andWhere(
+                        $builder->expr()->in(
+                            $table . '.' . $languageField,
+                            $builder->createNamedParameter(
+                                [-1, $languageAspect->getContentId()],
+                                Connection::PARAM_INT_ARRAY
+                            )
                         )
                     );
-                    $builder->andWhere(
-                        $builder->expr()->isNull('language_overlay.uid')
-                    );
-                    $languages[] = $languageAspect->getContentId();
                     break;
             }
         } elseif ($languageAspect !== null && $languageAspect->getContentId() === 0) {
-            $languages[] = 0;
-        }
-
-        if ($languageAspect !== null) {
             $builder->andWhere(
                 $builder->expr()->in(
                     $table . '.' . $languageField,
                     $builder->createNamedParameter(
-                        $languages,
+                        [-1, $languageAspect->getContentId()],
                         Connection::PARAM_INT_ARRAY
                     )
                 )

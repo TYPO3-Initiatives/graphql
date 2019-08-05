@@ -17,7 +17,7 @@
 		<pid>0</pid>
 		<sorting>1024</sorting>
 		<sys_language_uid>2</sys_language_uid>
-		<l10n_source>128</l10n_source>
+		<l10n_parent>128</l10n_parent>
 		<title>Seite 1</title>
 	</pages>
 	<pages>
@@ -25,7 +25,7 @@
 		<pid>128</pid>
 		<sorting>1280</sorting>
 		<sys_language_uid>2</sys_language_uid>
-		<l10n_source>129</l10n_source>
+		<l10n_parent>129</l10n_parent>
 		<title>Seite 1.1</title>
 	</pages>
 	<pages>
@@ -42,6 +42,62 @@
 		<sys_language_uid>2</sys_language_uid>
 		<title>Seite 3</title>
 	</pages>
+	<sys_file_reference>
+		<uid>261</uid>
+		<pid>88</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<uid_local>4</uid_local>
+		<uid_foreign>1029</uid_foreign>
+		<tablenames>tx_persistence_entity</tablenames>
+		<fieldname>relation_inline_11_file_reference</fieldname>
+		<sorting_foreign>256</sorting_foreign>
+		<table_local>sys_file</table_local>
+		<title>Dateiverweis 1</title>
+	</sys_file_reference>
+	<sys_file_reference>
+		<uid>262</uid>
+		<pid>88</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<uid_local>5</uid_local>
+		<uid_foreign>1029</uid_foreign>
+		<tablenames>tx_persistence_entity</tablenames>
+		<fieldname>relation_inline_1n_file_reference</fieldname>
+		<sorting_foreign>256</sorting_foreign>
+		<table_local>sys_file</table_local>
+		<title>Dateiverweis 2</title>
+	</sys_file_reference>
+	<sys_file_reference>
+		<uid>263</uid>
+		<pid>88</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<uid_local>6</uid_local>
+		<uid_foreign>1029</uid_foreign>
+		<tablenames>tx_persistence_entity</tablenames>
+		<fieldname>relation_inline_1n_file_reference</fieldname>
+		<sorting_foreign>512</sorting_foreign>
+		<table_local>sys_file</table_local>
+		<title>Dateiverweis 3</title>
+	</sys_file_reference>
+	<sys_file_reference>
+		<uid>264</uid>
+		<pid>88</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<uid_local>4</uid_local>
+		<uid_foreign>1029</uid_foreign>
+		<sorting_foreign>256</sorting_foreign>
+		<table_local>sys_file</table_local>
+		<title>Dateiverweis 4</title>
+	</sys_file_reference>
+	<sys_file_reference>
+		<uid>265</uid>
+		<pid>88</pid>
+		<sys_language_uid>2</sys_language_uid>
+		<uid_local>5</uid_local>
+		<uid_foreign>1029</uid_foreign>
+		<sorting_foreign>256</sorting_foreign>
+		<table_local>sys_file</table_local>
+		<title>Dateiverweis 5</title>
+	</sys_file_reference>
 	<tx_persistence_entity>
 		<uid>1029</uid>
 		<pid>128</pid>
@@ -49,6 +105,7 @@
 		<l10n_parent>1024</l10n_parent>
 		<title>Entität 1</title>
 		<scalar_string>Zeichenkette</scalar_string>
+		<relation_inline_1n_csv_file_reference>264,265</relation_inline_1n_csv_file_reference>
 	</tx_persistence_entity>
 	<tx_persistence_entity>
 		<uid>1030</uid>

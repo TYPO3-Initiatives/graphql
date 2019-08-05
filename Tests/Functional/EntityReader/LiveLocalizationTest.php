@@ -48,6 +48,7 @@ class LiveLocalizationTest extends FunctionalTestCase
             [
                 '{
                     pages {
+                        uid
                         title
                     }
                 }',
@@ -57,8 +58,8 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['title' => 'Seite 2'],
-                            ['title' => 'Seite 3'],
+                            ['uid' => 133, 'title' => 'Seite 2'],
+                            ['uid' => 134, 'title' => 'Seite 3'],
                         ],
                     ],
                 ],
@@ -66,6 +67,7 @@ class LiveLocalizationTest extends FunctionalTestCase
             [
                 '{
                     pages {
+                        uid
                         title
                     }
                 }',
@@ -75,9 +77,9 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['title' => 'Seite 1'],
-                            ['title' => 'Seite 1.1'],
-                            ['title' => 'Page 1.2'],
+                            ['uid' => 130, 'title' => 'Page 1.2'],
+                            ['uid' => 131, 'title' => 'Seite 1'],
+                            ['uid' => 132, 'title' => 'Seite 1.1'],
                         ],
                     ],
                 ],
@@ -85,6 +87,7 @@ class LiveLocalizationTest extends FunctionalTestCase
             [
                 '{
                     pages {
+                        uid
                         title
                     }
                 }',
@@ -94,8 +97,8 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['title' => 'Seite 1'],
-                            ['title' => 'Seite 1.1'],
+                            ['uid' => 131, 'title' => 'Seite 1'],
+                            ['uid' => 132, 'title' => 'Seite 1.1'],
                         ],
                     ],
                 ],
@@ -103,6 +106,7 @@ class LiveLocalizationTest extends FunctionalTestCase
             [
                 '{
                     pages {
+                        uid
                         title
                     }
                 }',
@@ -112,10 +116,10 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['title' => 'Seite 1'],
-                            ['title' => 'Seite 1.1'],
-                            ['title' => 'Seite 2'],
-                            ['title' => 'Seite 3'],
+                            ['uid' => 131, 'title' => 'Seite 1'],
+                            ['uid' => 132, 'title' => 'Seite 1.1'],
+                            ['uid' => 133, 'title' => 'Seite 2'],
+                            ['uid' => 134, 'title' => 'Seite 3'],
                         ],
                     ],
                 ],
@@ -137,6 +141,70 @@ class LiveLocalizationTest extends FunctionalTestCase
     public function relationPropertyQueryProvider()
     {
         return [
+            [
+                '{
+                    tx_persistence_entity {
+                        uid
+                        title
+                        relation_inline_1n_file_reference {
+                            uid
+                            title
+                            uid_local {
+                                identifier
+                            }
+                        }
+                    }
+                }',
+                [
+                    'language' => new LanguageAspect(2, null, LanguageAspect::OVERLAYS_ON, []),
+                ],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            [
+                                'uid' => 1029, 
+                                'title' => 'Entität 1', 
+                                'relation_inline_1n_file_reference' => [
+                                    [
+                                        'uid' => 262,
+                                        'title' => 'Dateiverweis 2',
+                                        'uid_local' => [
+                                            'identifier' => '/image_2.jpg'
+                                        ]
+                                    ],
+                                    [
+                                        'uid' => 263,
+                                        'title' => 'Dateiverweis 3',
+                                        'uid_local' => [
+                                            'identifier' => '/image_3.jpg'
+                                        ]
+                                    ],
+                                ]
+                            ],
+                            [
+                                'uid' => 1030, 
+                                'title' => 'Entität 2', 
+                                'relation_inline_1n_file_reference' => []
+                            ],
+                            [
+                                'uid' => 1031, 
+                                'title' => 'Entität 3', 
+                                'relation_inline_1n_file_reference' => []
+                            ],
+                            [
+                                'uid' => 1032, 
+                                'title' => 'Entität 4', 
+                                'relation_inline_1n_file_reference' => []
+                            ],
+                            [
+                                'uid' => 1033, 
+                                'title' => 'Entität 5', 
+                                'relation_inline_1n_file_reference' => []
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -144,10 +212,10 @@ class LiveLocalizationTest extends FunctionalTestCase
      * @test
      * @dataProvider relationPropertyQueryProvider
      */
-    public function readRelationProperty(string $query, array $expected)
+    public function readRelationProperty(string $query, array $aspects, array $expected)
     {
         $reader = new EntityReader();
-        $result = $reader->execute($query);
+        $result = $reader->execute($query, [], new Context($aspects));
         $this->assertEquals($expected, $result);
     }
 
@@ -202,8 +270,8 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['title' => 'Seite 1.1'],
                             ['title' => 'Page 1.2'],
+                            ['title' => 'Seite 1.1'],
                         ],
                     ],
                 ],

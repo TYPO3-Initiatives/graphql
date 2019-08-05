@@ -58,9 +58,10 @@ class FilterQueryHandler
             $event->getInfo(),
             $builder,
             function (QueryBuilder $builder, string $operator, array ...$operands) use ($event) {
-                $operands = array_map(function ($operand) use ($builder, $event) {
+                $table = array_pop(QueryHelper::getQueriedTables($builder, QueryHelper::QUERY_PART_FROM));
+                $operands = array_map(function ($operand) use ($builder, $event, $table) {
                     return isset($operand['identifier'])
-                        ? $this->getFieldExpression($operand['identifier'], $event->getInfo(), $builder)
+                        ? $builder->quoteIdentifier($table . '.' . $operand['identifier'])
                         : $builder->createNamedParameter($operand['value'], $operand['type']);
                 }, $operands);
 
@@ -83,31 +84,5 @@ class FilterQueryHandler
         if ($condition !== null) {
             $builder->andWhere($condition);
         }
-    }
-
-    protected function getFieldExpression(string $field, ResolveInfo $info, QueryBuilder $builder): string
-    {
-        $table = array_pop(QueryHelper::getQueriedTables($builder, QueryHelper::QUERY_PART_FROM));
-        $joinTables = QueryHelper::getQueriedTables($builder, QueryHelper::QUERY_PART_JOIN);
-        $languageOverlayTables = QueryHelper::filterLanguageOverlayTables($joinTables);
-
-        if (count($languageOverlayTables) > 0) {
-            $type = $info->schema->getType($table)->getField($field)->type;
-            $emptyValue = $type instanceof StringType ? '\'\'' : '0';
-
-            $expression = 'COALESCE(';
-
-            foreach ($languageOverlayTables as $languageOverlayTableAlias => $languageOverlayTable) {
-                $expression .= 'NULLIF(' . $builder->quoteIdentifier(
-                    $languageOverlayTableAlias . '.' . $field
-                ) . ',' . $emptyValue . '),';
-            }
-
-            $expression .= $builder->quoteIdentifier($table . '.' . $field) . ',NULL)';
-
-            return $expression;
-        }
-
-        return $builder->quoteIdentifier($table . '.' . $field);
     }
 }

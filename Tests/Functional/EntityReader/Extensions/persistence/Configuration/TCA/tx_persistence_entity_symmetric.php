@@ -7,8 +7,8 @@ return [
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',
         'languageField' => 'sys_language_uid',
-        'transOrigPointerField' => 'l18n_parent',
-        'transOrigDiffSourceField' => 'l18n_diffsource',
+        'transOrigPointerField' => 'l10n_parent',
+        'transOrigDiffSourceField' => 'l10n_diffsource',
         'delete' => 'deleted',
         'enablecolumns' => [
             'disabled' => 'hidden',
@@ -17,7 +17,7 @@ return [
         'origUid' => 't3_origuid',
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid,l18n_parent,l18n_diffsource,hidden,title,entity,peer',
+        'showRecordFieldList' => 'sys_language_uid,l10n_parent,l10n_diffsource,hidden,title,entity,peer',
     ],
     'columns' => [
         'sys_language_uid' => [
@@ -35,7 +35,7 @@ return [
                 'default' => 0,
             ],
         ],
-        'l18n_parent' => [
+        'l10n_parent' => [
             'displayCond' => 'FIELD:sys_language_uid:>:0',
             'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.l18n_parent',
@@ -53,7 +53,7 @@ return [
                 'default' => 0,
             ],
         ],
-        'l18n_diffsource' => [
+        'l10n_diffsource' => [
             'config' => [
                 'type' => 'passthrough',
                 'default' => '',
