@@ -16,8 +16,6 @@ namespace TYPO3\CMS\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
-use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\StringType;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;

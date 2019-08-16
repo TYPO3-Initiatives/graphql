@@ -16,6 +16,12 @@ namespace TYPO3\CMS\GraphQL;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Doctrine\DBAL\Types\BigIntType;
+use Doctrine\DBAL\Types\BooleanType;
+use Doctrine\DBAL\Types\DecimalType;
+use Doctrine\DBAL\Types\FloatType;
+use Doctrine\DBAL\Types\IntegerType;
+use Doctrine\DBAL\Types\SmallIntType;
 use GraphQL\Deferred;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
@@ -27,6 +33,7 @@ use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityRelationMap;
 use TYPO3\CMS\Core\Configuration\MetaModel\MultiplicityConstraint;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\Event\BeforeFieldArgumentsInitializationEvent;
@@ -130,6 +137,18 @@ class EntitySchemaFactory
                     $this->buildEntityInterfaceType(),
                 ],
                 'fields' => function () use ($entityDefinition) {
+                    $table = GeneralUtility::makeInstance(ConnectionPool::class)
+                        ->getConnectionForTable($entityDefinition->getName())
+                        ->getSchemaManager()
+                        ->listTableDetails($entityDefinition->getName());
+
+                    $propertyDefinitions = array_filter(
+                        $entityDefinition->getPropertyDefinitions(),
+                        function ($propertyDefinition) use ($table) {
+                            return $table->hasColumn($propertyDefinition->getName());
+                        }
+                    );
+
                     return array_map(function ($propertyDefinition) {
                         $type = $this->buildFieldType($propertyDefinition);
 
@@ -164,7 +183,7 @@ class EntitySchemaFactory
                         }
 
                         return $field;
-                    }, $entityDefinition->getPropertyDefinitions()) + $this->buildEntityInterfaceType()->getFields();
+                    }, $propertyDefinitions) + $this->buildEntityInterfaceType()->getFields();
                 },
                 'meta' => $entityDefinition,
             ]);
@@ -212,12 +231,22 @@ class EntitySchemaFactory
 
     protected function buildScalarFieldType(PropertyDefinition $propertyDefinition): Type
     {
-        switch ($propertyDefinition->getPropertyType()) {
-            case 'check':
-                return Type::boolean();
-            default:
-                return Type::string();
+        $type = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getConnectionForTable($propertyDefinition->getEntityDefinition()->getName())
+            ->getSchemaManager()
+            ->listTableDetails($propertyDefinition->getEntityDefinition()->getName())
+            ->getColumn($propertyDefinition->getName())
+            ->getType();
+
+        if ($type instanceof IntegerType || $type instanceof BigIntType || $type instanceof SmallIntType) {
+            return Type::int();
+        } else if ($type instanceof FloatType || $type instanceof DecimalType) {
+            return Type::float();
+        } else if ($type instanceof BooleanType) {
+            return Type::boolean();
         }
+        
+        return Type::string();
     }
 
     protected function getEventDispatcher(): EventDispatcherInterface

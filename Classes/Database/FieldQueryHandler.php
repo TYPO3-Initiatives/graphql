@@ -16,10 +16,6 @@ namespace TYPO3\CMS\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
-use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\StringType;
-use SebastianBergmann\RecursionContext\Context;
-use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
 use TYPO3\CMS\GraphQL\ResolverHelper;
@@ -41,7 +37,7 @@ class FieldQueryHandler
         $columns = [];
 
         foreach (ResolverHelper::getFields($event->getInfo(), $table) as $field) {
-            $columns[$field->name->value] = $builder->quoteIdentifier($table . '.' . $field->name->value) 
+            $columns[$field->name->value] = $builder->quoteIdentifier($table . '.' . $field->name->value)
                 . ' AS ' . $builder->quoteIdentifier($field->name->value);
         }
 

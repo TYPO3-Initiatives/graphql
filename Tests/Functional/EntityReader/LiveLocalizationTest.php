@@ -27,6 +27,8 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
  */
 class LiveLocalizationTest extends FunctionalTestCase
 {
+    use EntityReaderTestTrait;
+
     /**
      * @var array
      */
@@ -58,8 +60,8 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['uid' => 133, 'title' => 'Seite 2'],
-                            ['uid' => 134, 'title' => 'Seite 3'],
+                            ['uid' => '133', 'title' => 'Seite 2'],
+                            ['uid' => '134', 'title' => 'Seite 3'],
                         ],
                     ],
                 ],
@@ -77,9 +79,9 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['uid' => 130, 'title' => 'Page 1.2'],
-                            ['uid' => 131, 'title' => 'Seite 1'],
-                            ['uid' => 132, 'title' => 'Seite 1.1'],
+                            ['uid' => '130', 'title' => 'Page 1.2'],
+                            ['uid' => '131', 'title' => 'Seite 1'],
+                            ['uid' => '132', 'title' => 'Seite 1.1'],
                         ],
                     ],
                 ],
@@ -97,8 +99,8 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['uid' => 131, 'title' => 'Seite 1'],
-                            ['uid' => 132, 'title' => 'Seite 1.1'],
+                            ['uid' => '131', 'title' => 'Seite 1'],
+                            ['uid' => '132', 'title' => 'Seite 1.1'],
                         ],
                     ],
                 ],
@@ -116,10 +118,10 @@ class LiveLocalizationTest extends FunctionalTestCase
                 [
                     'data' => [
                         'pages' => [
-                            ['uid' => 131, 'title' => 'Seite 1'],
-                            ['uid' => 132, 'title' => 'Seite 1.1'],
-                            ['uid' => 133, 'title' => 'Seite 2'],
-                            ['uid' => 134, 'title' => 'Seite 3'],
+                            ['uid' => '131', 'title' => 'Seite 1'],
+                            ['uid' => '132', 'title' => 'Seite 1.1'],
+                            ['uid' => '133', 'title' => 'Seite 2'],
+                            ['uid' => '134', 'title' => 'Seite 3'],
                         ],
                     ],
                 ],
@@ -135,6 +137,10 @@ class LiveLocalizationTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query, [], new Context($aspects));
+
+        $this->sortResult($expected);
+        $this->sortResult($result);
+
         $this->assertEquals($expected, $result);
     }
 
@@ -162,18 +168,18 @@ class LiveLocalizationTest extends FunctionalTestCase
                     'data' => [
                         'tx_persistence_entity' => [
                             [
-                                'uid' => 1029, 
+                                'uid' => '1029', 
                                 'title' => 'Entität 1', 
                                 'relation_inline_1n_file_reference' => [
                                     [
-                                        'uid' => 262,
+                                        'uid' => '262',
                                         'title' => 'Dateiverweis 2',
                                         'uid_local' => [
                                             'identifier' => '/image_2.jpg'
                                         ]
                                     ],
                                     [
-                                        'uid' => 263,
+                                        'uid' => '263',
                                         'title' => 'Dateiverweis 3',
                                         'uid_local' => [
                                             'identifier' => '/image_3.jpg'
@@ -182,22 +188,22 @@ class LiveLocalizationTest extends FunctionalTestCase
                                 ]
                             ],
                             [
-                                'uid' => 1030, 
+                                'uid' => '1030', 
                                 'title' => 'Entität 2', 
                                 'relation_inline_1n_file_reference' => []
                             ],
                             [
-                                'uid' => 1031, 
+                                'uid' => '1031', 
                                 'title' => 'Entität 3', 
                                 'relation_inline_1n_file_reference' => []
                             ],
                             [
-                                'uid' => 1032, 
+                                'uid' => '1032', 
                                 'title' => 'Entität 4', 
                                 'relation_inline_1n_file_reference' => []
                             ],
                             [
-                                'uid' => 1033, 
+                                'uid' => '1033', 
                                 'title' => 'Entität 5', 
                                 'relation_inline_1n_file_reference' => []
                             ],
@@ -216,6 +222,10 @@ class LiveLocalizationTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query, [], new Context($aspects));
+
+        $this->sortResult($expected);
+        $this->sortResult($result);
+
         $this->assertEquals($expected, $result);
     }
 
@@ -233,6 +243,7 @@ class LiveLocalizationTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query);
+
         $this->assertEquals($expected, $result);
     }
 
@@ -324,6 +335,10 @@ class LiveLocalizationTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query, $bindings, new Context($aspects));
+
+        $this->sortResult($expected);
+        $this->sortResult($result);
+
         $this->assertEquals($expected, $result);
     }
 

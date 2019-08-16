@@ -27,6 +27,8 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
  */
 class LiveDefaultTest extends FunctionalTestCase
 {
+    use EntityReaderTestTrait;
+
     /**
      * @var array
      */
@@ -54,9 +56,9 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tt_content' => [
-                            ['uid' => 513, 'header' => 'Content 2'],
-                            ['uid' => 514, 'header' => 'Content 3'],
-                            ['uid' => 512, 'header' => 'Content 1'],
+                            ['uid' => '513', 'header' => 'Content 2'],
+                            ['uid' => '514', 'header' => 'Content 3'],
+                            ['uid' => '512', 'header' => 'Content 1'],
                         ],
                     ],
                 ],
@@ -72,11 +74,11 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027, 'scalar_float' => -3.1415, 'scalar_string' => 'String'],
-                            ['uid' => 1025, 'scalar_float' => 3.1415, 'scalar_string' => null],
-                            ['uid' => 1024, 'scalar_float' => 0, 'scalar_string' => 'String'],
-                            ['uid' => 1026, 'scalar_float' => 0, 'scalar_string' => null],
-                            ['uid' => 1028, 'scalar_float' => 0, 'scalar_string' => null],
+                            ['uid' => '1027', 'scalar_float' => -3.1415, 'scalar_string' => 'String'],
+                            ['uid' => '1025', 'scalar_float' => 3.1415, 'scalar_string' => null],
+                            ['uid' => '1024', 'scalar_float' => 0, 'scalar_string' => 'String'],
+                            ['uid' => '1026', 'scalar_float' => 0, 'scalar_string' => null],
+                            ['uid' => '1028', 'scalar_float' => 0, 'scalar_string' => null],
                         ],
                     ],
                 ],
@@ -106,9 +108,9 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'sys_category' => [
-                            ['uid' => 32],
-                            ['uid' => 33],
-                            ['uid' => 34],
+                            ['uid' => '32'],
+                            ['uid' => '33'],
+                            ['uid' => '34'],
                         ],
                     ],
                 ],
@@ -124,7 +126,11 @@ class LiveDefaultTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query);
-        $this->assertEquals($expected, $result);
+
+        $this->sortResult($expected);
+        $this->sortResult($result);
+
+        $this->assertEqualsCanonicalizing($expected, $result);
     }
 
     public function relationPropertyQueryProvider()
@@ -614,7 +620,11 @@ class LiveDefaultTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query);
-        $this->assertEquals($expected, $result);
+
+        $this->sortResult($expected);
+        $this->sortResult($result);
+
+        $this->assertEqualsCanonicalizing($expected, $result);
     }
 
     public function orderResultQueryProvider()
@@ -730,7 +740,7 @@ class LiveDefaultTest extends FunctionalTestCase
             ],
             [
                 '{
-                    tx_persistence_entity {
+                    tx_persistence_entity(order: "uid ascending") {
                         uid
                         relation_group_mn_csv_content_page (
                             order: "pid ascending, title on pages ascending, header on tt_content descending"
@@ -749,15 +759,11 @@ class LiveDefaultTest extends FunctionalTestCase
                     'data' => [
                         'tx_persistence_entity' => [
                             [
-                                'uid' => '1027',
+                                'uid' => '1024',
                                 'relation_group_mn_csv_content_page' => [],
                             ],
                             [
                                 'uid' => '1025',
-                                'relation_group_mn_csv_content_page' => [],
-                            ],
-                            [
-                                'uid' => '1024',
                                 'relation_group_mn_csv_content_page' => [],
                             ],
                             [
@@ -770,6 +776,10 @@ class LiveDefaultTest extends FunctionalTestCase
                                     ['uid' => '129', 'title' => 'Page 1.1'],
                                     ['uid' => '130', 'title' => 'Page 1.2'],
                                 ],
+                            ],
+                            [
+                                'uid' => '1027',
+                                'relation_group_mn_csv_content_page' => [],
                             ],
                             [
                                 'uid' => '1028',
@@ -842,6 +852,7 @@ class LiveDefaultTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query);
+
         $this->assertEquals($expected, $result);
     }
 
@@ -860,8 +871,8 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
-                            ['uid' => 1024],
+                            ['uid' => '1027'],
+                            ['uid' => '1024'],
                         ],
                     ],
                 ],
@@ -878,10 +889,10 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
-                            ['uid' => 1025],
-                            ['uid' => 1024],
-                            ['uid' => 1028],
+                            ['uid' => '1027'],
+                            ['uid' => '1025'],
+                            ['uid' => '1024'],
+                            ['uid' => '1028'],
                         ],
                     ],
                 ],
@@ -898,9 +909,9 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1025],
-                            ['uid' => 1024],
-                            ['uid' => 1028],
+                            ['uid' => '1025'],
+                            ['uid' => '1024'],
+                            ['uid' => '1028'],
                         ],
                     ],
                 ],
@@ -917,8 +928,8 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
-                            ['uid' => 1024],
+                            ['uid' => '1027'],
+                            ['uid' => '1024'],
                         ],
                     ],
                 ],
@@ -935,8 +946,8 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
-                            ['uid' => 1025],
+                            ['uid' => '1027'],
+                            ['uid' => '1025'],
                         ],
                     ],
                 ],
@@ -953,9 +964,9 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
-                            ['uid' => 1025],
-                            ['uid' => 1026],
+                            ['uid' => '1027'],
+                            ['uid' => '1025'],
+                            ['uid' => '1026'],
                         ],
                     ],
                 ],
@@ -972,8 +983,8 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
-                            ['uid' => 1025],
+                            ['uid' => '1027'],
+                            ['uid' => '1025'],
                         ],
                     ],
                 ],
@@ -990,9 +1001,9 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1025],
-                            ['uid' => 1024],
-                            ['uid' => 1026],
+                            ['uid' => '1025'],
+                            ['uid' => '1024'],
+                            ['uid' => '1026'],
                         ],
                     ],
                 ],
@@ -1009,8 +1020,8 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
-                            ['uid' => 1024],
+                            ['uid' => '1027'],
+                            ['uid' => '1024'],
                         ],
                     ],
                 ],
@@ -1027,9 +1038,9 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1025],
-                            ['uid' => 1026],
-                            ['uid' => 1028],
+                            ['uid' => '1025'],
+                            ['uid' => '1026'],
+                            ['uid' => '1028'],
                         ],
                     ],
                 ],
@@ -1046,7 +1057,7 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1025],
+                            ['uid' => '1025'],
                         ],
                     ],
                 ],
@@ -1063,10 +1074,10 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
-                            ['uid' => 1024],
-                            ['uid' => 1026],
-                            ['uid' => 1028],
+                            ['uid' => '1027'],
+                            ['uid' => '1024'],
+                            ['uid' => '1026'],
+                            ['uid' => '1028'],
                         ],
                     ],
                 ],
@@ -1083,7 +1094,7 @@ class LiveDefaultTest extends FunctionalTestCase
                 [
                     'data' => [
                         'tx_persistence_entity' => [
-                            ['uid' => 1027],
+                            ['uid' => '1027'],
                         ],
                     ],
                 ],
@@ -1099,7 +1110,11 @@ class LiveDefaultTest extends FunctionalTestCase
     {
         $reader = new EntityReader();
         $result = $reader->execute($query, $bindings);
-        $this->assertEquals($expected, $result);
+
+        $this->sortResult($expected);
+        $this->sortResult($result);
+
+        $this->assertEqualsCanonicalizing($expected, $result);
     }
 
     public function unsupportedQueryProvider()

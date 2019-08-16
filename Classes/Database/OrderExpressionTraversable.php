@@ -21,7 +21,6 @@ use Hoa\Compiler\Llk\TreeNode;
 use IteratorAggregate;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
-use TYPO3\CMS\Core\Database\Query\QueryHelper;
 use Webmozart\Assert\Assert;
 
 /**
@@ -94,33 +93,9 @@ class OrderExpressionTraversable implements IteratorAggregate
     {
         $meta = $this->type->config['meta'];
 
-        if ($this->expression) {
-            yield from $this->getExpressionIterator();
-        } elseif ($meta instanceof EntityDefinition) {
-            yield from $this->getEntityIterator();
-        } elseif ($meta instanceof PropertyDefinition) {
-            yield from $this->getPropertyIterator();
+        if (!$this->expression) {
+            return;
         }
-    }
-
-    protected function getEntityIterator()
-    {
-        $meta = $this->type->config['meta'];
-        $configuration = $GLOBALS['TCA'][$meta->getName()]['ctrl'];
-        $expression = $configuration['sortby'] ?: $configuration['default_sortby'];
-
-        foreach (QueryHelper::parseOrderBy($expression ?? '') as $item) {
-            yield [
-                'constraint' => $meta->getName(),
-                'field' => $item[0],
-                'order' => self::ORDER_MAPPINGS[strtolower($item[1] ?? 'ascending')],
-            ];
-        }
-    }
-
-    protected function getExpressionIterator()
-    {
-        $meta = $this->type->config['meta'];
 
         foreach ($this->expression->getChildren() as $item) {
             $path = $item->getChild(0);
@@ -142,38 +117,6 @@ class OrderExpressionTraversable implements IteratorAggregate
                     'field' => $field,
                     'order' => self::ORDER_MAPPINGS[strtolower($order)],
                 ];
-            }
-        }
-    }
-
-    protected function getPropertyIterator()
-    {
-        $meta = $this->type->config['meta'];
-        $configuration = $meta->getConfiguration();
-
-        if ($meta->isManyToManyRelationProperty()) {
-            yield [
-                'constraint' => $this->mode === self::MODE_SQL ? $meta->getManyToManyTableName() : null,
-                'field' => 'sorting',
-                'order' => self::ORDER_ASCENDING,
-            ];
-        } elseif ($meta->isSelectRelation() || $meta->isInlineRelationProperty()) {
-            if (isset($configuration['config']['foreign_sortby'])) {
-                yield [
-                    'constraint' => $configuration['config']['foreign_table'],
-                    'field' => $configuration['config']['foreign_sortby'],
-                    'order' => self::ORDER_ASCENDING,
-                ];
-            } elseif (isset($configuration['config']['foreign_default_sortby'])) {
-                $expression = $configuration['config']['foreign_default_sortby'];
-
-                foreach (QueryHelper::parseOrderBy($expression ?? '') as $item) {
-                    yield [
-                        'constraint' => $meta->getName(),
-                        'field' => $item[0],
-                        'order' => self::ORDER_MAPPINGS[strtolower($item[1] ?? 'ascending')],
-                    ];
-                }
             }
         }
     }
