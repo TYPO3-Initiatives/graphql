@@ -20,7 +20,7 @@
 %token _bracket             \]
 %token comma                ,
 %token dot                  \.
-%token colon                :
+%token dollar               \$
 
 %token greater_than_equals  >=
 %token less_than_equals     <=
@@ -68,7 +68,7 @@ ternary:
     ::on:: <identifier>
 
 #parameter:
-    ::colon:: <identifier>
+    ::dollar:: <identifier>
 
 #list:
     ::bracket_:: ( integers() | strings() | floats() ) ::_bracket::

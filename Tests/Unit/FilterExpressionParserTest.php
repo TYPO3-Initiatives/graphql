@@ -280,7 +280,7 @@ class FilterExpressionParserTest extends UnitTestCase
                 ],
             ],
             [
-                'foo = bar or not baz match :qux',
+                'foo = bar or not baz match $qux',
                 [
                     'id' => '#or',
                     'children' => [
@@ -421,7 +421,7 @@ class FilterExpressionParserTest extends UnitTestCase
                 ],
             ],
             [
-                'not (foo = null and (baz = true or foo = :bar))',
+                'not (foo = null and (baz = true or foo = $bar))',
                 [
                     'id' => '#not',
                     'children' => [
