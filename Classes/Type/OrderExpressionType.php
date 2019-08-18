@@ -17,6 +17,7 @@ namespace TYPO3\CMS\GraphQL\Type;
  */
 
 use GraphQL\Type\Definition\ScalarType;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\OrderExpressionParser;
 
 /**
@@ -45,11 +46,11 @@ class OrderExpressionType extends ScalarType
 
     public function parseValue($value)
     {
-        return OrderExpressionParser::parse($value);
+        return GeneralUtility::makeInstance(OrderExpressionParser::class)->parse($value);
     }
 
     public function parseLiteral($valueNode, array $variables = null)
     {
-        return OrderExpressionParser::parse($valueNode->value);
+        return GeneralUtility::makeInstance(OrderExpressionParser::class)->parse($valueNode->value);
     }
 }

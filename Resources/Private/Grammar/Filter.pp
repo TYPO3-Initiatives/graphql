@@ -43,20 +43,20 @@ secondary:
 ternary:
     ::parenthesis_:: primary() ::_parenthesis::
   | ::not:: #not primary()
-  | field() ::equals:: #equals ( field() | parameter() | scalar() )
-  | ( field() | parameter() | scalar() ) ::equals:: #equals field()
-  | field() ::greater_than:: #greater_than ( field() | parameter() | scalar() )
-  | ( field() | parameter() | scalar() ) ::greater_than:: #greater_than field()
-  | field() ::less_than:: #less_than ( field() | parameter() | scalar() )
-  | ( field() | parameter() | scalar() ) ::less_than:: #less_than field()
-  | field() ::greater_than_equals:: #greater_than_equals ( field() | parameter() | scalar() )
-  | ( field() | parameter() | scalar() ) ::greater_than_equals:: #greater_than_equals field()
-  | field() ::less_than_equals:: #less_than_equals ( field() | parameter() | scalar() )
-  | ( field() | parameter() | scalar() ) ::less_than_equals:: #less_than_equals field()
-  | field() ::not_equals:: #not_equals ( field() | parameter() | scalar() )
-  | ( field() | parameter() | scalar() ) ::not_equals:: #not_equals field()
-  | field() ::in:: #in ( list() | parameter() )
-  | field() ::match:: #match ( <string> | parameter() )
+  | field() ::equals:: #equals ( field() | variable() | scalar() )
+  | ( field() | variable() | scalar() ) ::equals:: #equals field()
+  | field() ::greater_than:: #greater_than ( field() | variable() | scalar() )
+  | ( field() | variable() | scalar() ) ::greater_than:: #greater_than field()
+  | field() ::less_than:: #less_than ( field() | variable() | scalar() )
+  | ( field() | variable() | scalar() ) ::less_than:: #less_than field()
+  | field() ::greater_than_equals:: #greater_than_equals ( field() | variable() | scalar() )
+  | ( field() | variable() | scalar() ) ::greater_than_equals:: #greater_than_equals field()
+  | field() ::less_than_equals:: #less_than_equals ( field() | variable() | scalar() )
+  | ( field() | variable() | scalar() ) ::less_than_equals:: #less_than_equals field()
+  | field() ::not_equals:: #not_equals ( field() | variable() | scalar() )
+  | ( field() | variable() | scalar() ) ::not_equals:: #not_equals field()
+  | field() ::in:: #in ( list() | variable() )
+  | field() ::match:: #match ( <string> | variable() )
 
 #field:
     path() constraint()?
@@ -67,7 +67,7 @@ ternary:
 #constraint:
     ::on:: <identifier>
 
-#parameter:
+#variable:
     ::dollar:: <identifier>
 
 #list:

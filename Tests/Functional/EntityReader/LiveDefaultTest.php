@@ -16,10 +16,8 @@ namespace TYPO3\CMS\GraphQL\Tests\Functional\EntityReader;
  * The TYPO3 project - inspiring people to share!
  */
 
-use Exception;
 use TYPO3\CMS\GraphQL\EntityReader;
-use TYPO3\CMS\GraphQL\Exception\NotSupportedException;
-use TYPO3\CMS\GraphQL\Exception\SchemaException;
+use TYPO3\CMS\GraphQL\Exception\ExecutionException;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 /**
@@ -974,7 +972,7 @@ class LiveDefaultTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "scalar_float = -3.1415 or scalar_float = 3.1415 and null = l10n_state"
+                        filter: "scalar_float = 3.1415 or scalar_float = -3.1415 and null = scalar_text"
                     ) {
                         uid
                     }
@@ -1048,7 +1046,7 @@ class LiveDefaultTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "3 < scalar_float"
+                        filter: "3.0 < scalar_float"
                     ) {
                         uid
                     }
@@ -1065,7 +1063,7 @@ class LiveDefaultTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "not 3 < scalar_float"
+                        filter: "not 3.0 < scalar_float"
                     ) {
                         uid
                     }
@@ -1085,7 +1083,7 @@ class LiveDefaultTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        filter: "-3 > scalar_float"
+                        filter: "-3.0 > scalar_float"
                     ) {
                         uid
                     }
@@ -1099,6 +1097,119 @@ class LiveDefaultTest extends FunctionalTestCase
                     ],
                 ],
             ],
+            [
+                '{
+                    tx_persistence_entity (
+                        filter: "relation_select_1n_page = `129`"
+                    ) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => '1025'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'query bar($foo: [Float]) {
+                    tx_persistence_entity (
+                        filter: "scalar_float in $foo"
+                    ) {
+                        uid
+                    }
+                }',
+                [
+                    'foo' => [-3.1415, 3.1415],
+                ],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => '1025'],
+                            ['uid' => '1027'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'query bar($qux: [Int]) {
+                    tx_persistence_entity (
+                        filter: "scalar_integer in $qux"
+                    ) {
+                        uid
+                    }
+                }',
+                [
+                    'qux' => null,
+                ],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [],
+                    ],
+                ],
+            ],
+            [
+                'query foo($bar: String) {
+                    tx_persistence_entity (
+                        filter: "scalar_string = $bar"
+                    ) {
+                        uid
+                    }
+                }',
+                [
+                    'bar' => "String",
+                ],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => '1024'],
+                            ['uid' => '1027'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'query foo($baz: String) {
+                    tx_persistence_entity (
+                        filter: "$baz = scalar_text"
+                    ) {
+                        uid
+                    }
+                }',
+                [
+                    'baz' => null,
+                ],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => '1027'],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'query foo($bar: Int) {
+                    tx_persistence_entity (
+                        filter: "$bar <= scalar_integer"
+                    ) {
+                        uid
+                    }
+                }',
+                [
+                    'bar' => 1,
+                ],
+                [
+                    'data' => [
+                        'tx_persistence_entity' => [
+                            ['uid' => '1026'],
+                            ['uid' => '1027'],
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -1106,10 +1217,10 @@ class LiveDefaultTest extends FunctionalTestCase
      * @test
      * @dataProvider filterRestrictedQueryProvider
      */
-    public function readFilterRestricted(string $query, array $bindings, array $expected)
+    public function readFilterRestricted(string $query, array $variables, array $expected)
     {
         $reader = new EntityReader();
-        $result = $reader->execute($query, $bindings);
+        $result = $reader->execute($query, $variables);
 
         $this->sortResult($expected);
         $this->sortResult($result);
@@ -1123,20 +1234,6 @@ class LiveDefaultTest extends FunctionalTestCase
             [
                 '{
                     tx_persistence_entity (
-                        order: "relation_select_mn_mm_content ascending"
-                    ) {
-                        title
-                        relation_select_mn_mm_content {
-                            header
-                        }
-                    }
-                }',
-                NotSupportedException::class,
-                1560598442,
-            ],
-            [
-                '{
-                    tx_persistence_entity (
                         order: "relation_select_mn_mm_content.header ascending"
                     ) {
                         title
@@ -1145,8 +1242,8 @@ class LiveDefaultTest extends FunctionalTestCase
                         }
                     }
                 }',
-                NotSupportedException::class,
-                1563841549,
+                ExecutionException::class,
+                1566148265,
             ],
             [
                 '{
@@ -1156,19 +1253,19 @@ class LiveDefaultTest extends FunctionalTestCase
                         title
                     }
                 }',
-                NotSupportedException::class,
-                1560598849,
+                ExecutionException::class,
+                1566148265,
             ],
             [
                 '{
                     tx_persistence_entity (
-                        order: "title on Entity ascending"
+                        filter: "relation_select_mn_mm_content.header = `foo`"
                     ) {
                         title
                     }
                 }',
-                NotSupportedException::class,
-                1560648120,
+                ExecutionException::class,
+                1566148265,
             ],
         ];
     }
@@ -1176,16 +1273,15 @@ class LiveDefaultTest extends FunctionalTestCase
     /**
      * @test
      * @dataProvider unsupportedQueryProvider
+     * @todo Assert errors
      */
     public function throwUnsupported(string $query, string $exceptionClass, int $exceptionCode)
     {
-        try {
-            $reader = new EntityReader();
-            $reader->execute($query);
-        } catch (Exception $exception) {
-            $this->assertInstanceOf($exceptionClass, $exception);
-            $this->assertEquals($exceptionCode, $exception->getCode());
-        }
+        $this->expectException($exceptionClass);
+        $this->expectExceptionCode($exceptionCode);
+
+        $reader = new EntityReader();
+        $reader->execute($query);
     }
 
     public function invalidQueryProvider()
@@ -1199,8 +1295,9 @@ class LiveDefaultTest extends FunctionalTestCase
                         title
                     }
                 }',
-                SchemaException::class,
-                1560645175,
+                [],
+                ExecutionException::class,
+                1566148265,
             ],
             [
                 '{
@@ -1210,8 +1307,9 @@ class LiveDefaultTest extends FunctionalTestCase
                         title
                     }
                 }',
-                SchemaException::class,
-                1560598849,
+                [],
+                ExecutionException::class,
+                1566148265,
             ],
             [
                 '{
@@ -1224,8 +1322,45 @@ class LiveDefaultTest extends FunctionalTestCase
                         }
                     }
                 }',
-                SchemaException::class,
-                1560655028,
+                [],
+                ExecutionException::class,
+                1566148265,
+            ],
+            [
+                'query baz($bar: String) {
+                    tx_persistence_entity (filter: "uid in $bar") {
+                        uid
+                    }
+                }',
+                [
+                    'bar' => 'String',
+                ],
+                ExecutionException::class,
+                1566148265,
+            ],
+            [
+                'query foo($qux: Int) {
+                    tx_persistence_entity (filter: "uid match $qux") {
+                        uid
+                    }
+                }',
+                [
+                    'qux' => 1,
+                ],
+                ExecutionException::class,
+                1566148265,
+            ],
+            [
+                'query bar($foo: Float) {
+                    tx_persistence_entity (filter: "uid = $foo") {
+                        uid
+                    }
+                }',
+                [
+                    'foo' => 3.1415,
+                ],
+                ExecutionException::class,
+                1566148265,
             ],
         ];
     }
@@ -1233,15 +1368,14 @@ class LiveDefaultTest extends FunctionalTestCase
     /**
      * @test
      * @dataProvider invalidQueryProvider
+     * @todo Assert errors
      */
-    public function throwInvalid(string $query, string $exceptionClass, int $exceptionCode)
+    public function throwInvalid(string $query, array $variables, string $exceptionClass, int $exceptionCode)
     {
-        try {
-            $reader = new EntityReader();
-            $reader->execute($query);
-        } catch (Exception $exception) {
-            $this->assertInstanceOf($exceptionClass, $exception);
-            $this->assertEquals($exceptionCode, $exception->getCode());
-        }
+        $this->expectException($exceptionClass);
+        $this->expectExceptionCode($exceptionCode);
+        
+        $reader = new EntityReader();
+        $reader->execute($query, $variables);
     }
 }

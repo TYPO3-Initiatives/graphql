@@ -16,21 +16,29 @@ namespace TYPO3\CMS\GraphQL\Exception;
  * The TYPO3 project - inspiring people to share!
  */
 
-use GraphQL\Error\ClientAware;
+use GraphQL\Error\Error;
+use Throwable;
 use TYPO3\CMS\Core\Exception;
 
 /**
  * @api
  */
-class NotSupportedException extends Exception implements ClientAware
+class ExecutionException extends Exception
 {
-    public function isClientSafe()
+    /**
+     * @var array
+     */
+    protected $errors;
+
+    public function __construct(string $message = "", int $code = 0, Throwable $previous = null, Error ...$errors)
     {
-        return true;
+        parent::__construct($message, $code, $previous);
+
+        $this->errors = $errors;
     }
 
-    public function getCategory()
+    public function getErrors(): array
     {
-        return 'typo3';
+        return $this->errors;
     }
 }

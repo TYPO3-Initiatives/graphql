@@ -16,7 +16,6 @@ namespace TYPO3\CMS\GraphQL\Tests\Functional\EntityReader;
  * The TYPO3 project - inspiring people to share!
  */
 
-use Exception;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\GraphQL\EntityReader;
@@ -168,44 +167,44 @@ class LiveLocalizationTest extends FunctionalTestCase
                     'data' => [
                         'tx_persistence_entity' => [
                             [
-                                'uid' => '1029', 
-                                'title' => 'Entität 1', 
+                                'uid' => '1029',
+                                'title' => 'Entität 1',
                                 'relation_inline_1n_file_reference' => [
                                     [
                                         'uid' => '262',
                                         'title' => 'Dateiverweis 2',
                                         'uid_local' => [
-                                            'identifier' => '/image_2.jpg'
-                                        ]
+                                            'identifier' => '/image_2.jpg',
+                                        ],
                                     ],
                                     [
                                         'uid' => '263',
                                         'title' => 'Dateiverweis 3',
                                         'uid_local' => [
-                                            'identifier' => '/image_3.jpg'
-                                        ]
+                                            'identifier' => '/image_3.jpg',
+                                        ],
                                     ],
-                                ]
+                                ],
                             ],
                             [
-                                'uid' => '1030', 
-                                'title' => 'Entität 2', 
-                                'relation_inline_1n_file_reference' => []
+                                'uid' => '1030',
+                                'title' => 'Entität 2',
+                                'relation_inline_1n_file_reference' => [],
                             ],
                             [
-                                'uid' => '1031', 
-                                'title' => 'Entität 3', 
-                                'relation_inline_1n_file_reference' => []
+                                'uid' => '1031',
+                                'title' => 'Entität 3',
+                                'relation_inline_1n_file_reference' => [],
                             ],
                             [
-                                'uid' => '1032', 
-                                'title' => 'Entität 4', 
-                                'relation_inline_1n_file_reference' => []
+                                'uid' => '1032',
+                                'title' => 'Entität 4',
+                                'relation_inline_1n_file_reference' => [],
                             ],
                             [
-                                'uid' => '1033', 
-                                'title' => 'Entität 5', 
-                                'relation_inline_1n_file_reference' => []
+                                'uid' => '1033',
+                                'title' => 'Entität 5',
+                                'relation_inline_1n_file_reference' => [],
                             ],
                         ],
                     ],
@@ -354,13 +353,11 @@ class LiveLocalizationTest extends FunctionalTestCase
      */
     public function throwUnsupported(string $query, string $exceptionClass, int $exceptionCode)
     {
-        try {
-            $reader = new EntityReader();
-            $reader->execute($query);
-        } catch (Exception $exception) {
-            $this->assertInstanceOf($exceptionClass, $exception);
-            $this->assertEquals($exceptionCode, $exception->getCode());
-        }
+        $this->expectException($exceptionClass);
+        $this->expectExceptionCode($exceptionCode);
+
+        $reader = new EntityReader();
+        $reader->execute($query);
     }
 
     public function invalidQueryProvider()
@@ -375,12 +372,10 @@ class LiveLocalizationTest extends FunctionalTestCase
      */
     public function throwInvalid(string $query, string $exceptionClass, int $exceptionCode)
     {
-        try {
-            $reader = new EntityReader();
-            $reader->execute($query);
-        } catch (Exception $exception) {
-            $this->assertInstanceOf($exceptionClass, $exception);
-            $this->assertEquals($exceptionCode, $exception->getCode());
-        }
+        $this->expectException($exceptionClass);
+        $this->expectExceptionCode($exceptionCode);
+
+        $reader = new EntityReader();
+        $reader->execute($query);
     }
 }

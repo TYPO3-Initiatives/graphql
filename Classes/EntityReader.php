@@ -16,13 +16,21 @@ namespace TYPO3\CMS\GraphQL;
  * The TYPO3 project - inspiring people to share!
  */
 
-use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
+use GraphQL\Validator\DocumentValidator;
+use GraphQL\Validator\Rules\NoUndefinedVariables;
+use GraphQL\Validator\Rules\NoUnusedVariables;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityRelationMapFactory;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\EntitySchemaFactory;
+use TYPO3\CMS\GraphQL\Exception\ExecutionException;
+use TYPO3\CMS\GraphQL\Validator\FiltersOnCorrectTypeRule;
+use TYPO3\CMS\GraphQL\Validator\NoUndefinedVariablesRule;
+use TYPO3\CMS\GraphQL\Validator\NoUnsupportedFeaturesRule;
+use TYPO3\CMS\GraphQL\Validator\NoUnusedVariablesRule;
+use TYPO3\CMS\GraphQL\Validator\OrdersOnCorrectTypeRule;
 
 /**
  * @api
@@ -30,7 +38,7 @@ use TYPO3\CMS\GraphQL\EntitySchemaFactory;
 class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
 {
     /**
-     * @var Schema
+     * @var \GraphQL\Type\Schema
      */
     protected static $schema = null;
 
@@ -59,7 +67,20 @@ class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
             $bindings,
             null,
             null,
-            GraphQL::getStandardValidationRules()
-        )->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
+            array_merge(
+                DocumentValidator::defaultRules(),
+                [
+                    NoUndefinedVariables::class => new NoUndefinedVariablesRule(),
+                    NoUnusedVariables::class => new NoUnusedVariablesRule(),
+                    NoUnsupportedFeaturesRule::class => new NoUnsupportedFeaturesRule(),
+                    FiltersOnCorrectTypeRule::class => new FiltersOnCorrectTypeRule(),
+                    OrdersOnCorrectTypeRule::class => new OrdersOnCorrectTypeRule(),
+                ]
+            )
+        )
+        ->setErrorsHandler(function (array $errors, callable $formatter) {
+            throw new ExecutionException('Query execution has failed.', 1566148265, null, ...$errors);
+        })
+        ->toArray();
     }
 }

@@ -16,12 +16,6 @@ namespace TYPO3\CMS\GraphQL;
  * The TYPO3 project - inspiring people to share!
  */
 
-use Doctrine\DBAL\Types\BigIntType;
-use Doctrine\DBAL\Types\BooleanType;
-use Doctrine\DBAL\Types\DecimalType;
-use Doctrine\DBAL\Types\FloatType;
-use Doctrine\DBAL\Types\IntegerType;
-use Doctrine\DBAL\Types\SmallIntType;
 use GraphQL\Deferred;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\ObjectType;
@@ -37,6 +31,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\Event\BeforeFieldArgumentsInitializationEvent;
+use TYPO3\CMS\GraphQL\Utility\TypeUtility;
 
 /**
  * @internal
@@ -149,7 +144,7 @@ class EntitySchemaFactory
                         }
                     );
 
-                    return array_map(function ($propertyDefinition) {
+                    return array_map(function ($propertyDefinition) use ($table) {
                         $type = $this->buildFieldType($propertyDefinition);
 
                         $name = $propertyDefinition->getName();
@@ -161,6 +156,7 @@ class EntitySchemaFactory
                             'name' => $name,
                             'type' => $type,
                             'meta' => $propertyDefinition,
+                            'storage' => $table->getColumn($name)->getType(),
                         ];
 
                         if ($propertyDefinition->isRelationProperty()
@@ -194,6 +190,9 @@ class EntitySchemaFactory
         return $objectType;
     }
 
+    /**
+     * @todo Remove field specific `meta` from generic type configuration.
+     */
     protected function buildFieldType(PropertyDefinition $propertyDefinition): Type
     {
         $type = $propertyDefinition->isRelationProperty()
@@ -238,15 +237,7 @@ class EntitySchemaFactory
             ->getColumn($propertyDefinition->getName())
             ->getType();
 
-        if ($type instanceof IntegerType || $type instanceof BigIntType || $type instanceof SmallIntType) {
-            return Type::int();
-        } else if ($type instanceof FloatType || $type instanceof DecimalType) {
-            return Type::float();
-        } else if ($type instanceof BooleanType) {
-            return Type::boolean();
-        }
-        
-        return Type::string();
+        return TypeUtility::mapDatabaseType($type);
     }
 
     protected function getEventDispatcher(): EventDispatcherInterface

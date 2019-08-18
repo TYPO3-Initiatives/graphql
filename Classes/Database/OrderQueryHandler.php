@@ -56,13 +56,6 @@ class OrderQueryHandler
         $tables = array_flip(QueryHelper::getQueriedTables($builder));
         $expression = $arguments[OrderArgumentProvider::ARGUMENT_NAME] ?? null;
 
-        GeneralUtility::makeInstance(
-            OrderExpressionValidator::class,
-            $type,
-            $expression,
-            $event->getInfo()
-        )->validate();
-
         $items = GeneralUtility::makeInstance(OrderExpressionTraversable::class, $type, $expression);
 
         foreach ($items as $item) {
