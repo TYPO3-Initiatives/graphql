@@ -18,11 +18,17 @@ namespace TYPO3\CMS\GraphQL;
 
 use GraphQL\Error\Debug;
 use GraphQL\GraphQL;
+use GraphQL\Validator\DocumentValidator;
+use GraphQL\Validator\Rules\NoUndefinedVariables;
+use GraphQL\Validator\Rules\NoUnusedVariables;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityRelationMapFactory;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\EntitySchemaFactory;
+use TYPO3\CMS\GraphQL\Validator\NoUndefinedVariablesRule;
+use TYPO3\CMS\GraphQL\Validator\NoUnusedVariablesRule;
+use TYPO3\CMS\GraphQL\Validator\VariablesOfCorrectTypeRule;
 
 /**
  * @api
@@ -30,7 +36,7 @@ use TYPO3\CMS\GraphQL\EntitySchemaFactory;
 class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
 {
     /**
-     * @var Schema
+     * @var \GraphQL\Type\Schema
      */
     protected static $schema = null;
 
@@ -59,7 +65,14 @@ class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
             $bindings,
             null,
             null,
-            GraphQL::getStandardValidationRules()
+            array_merge(
+                DocumentValidator::defaultRules(),
+                [
+                    NoUndefinedVariables::class => new NoUndefinedVariablesRule(),
+                    NoUnusedVariables::class => new NoUnusedVariablesRule(),
+                    VariablesOfCorrectTypeRule::class => new VariablesOfCorrectTypeRule(),
+                ]
+            )
         )->toArray(Debug::RETHROW_INTERNAL_EXCEPTIONS);
     }
 }

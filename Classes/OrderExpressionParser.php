@@ -16,30 +16,13 @@ namespace TYPO3\CMS\GraphQL;
  * The TYPO3 project - inspiring people to share!
  */
 
-use Hoa\Compiler\Llk\Llk;
-use Hoa\Compiler\Llk\TreeNode;
-use Hoa\File\Read;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 /**
  * @internal
  */
-class OrderExpressionParser
+class OrderExpressionParser extends AbstractExpressionParser
 {
-    protected static $compiler;
-
     /**
-     * @throws \Hoa\Compiler\Exception\UnexpectedToken
+     * @inheritdoc
      */
-    public static function parse($expression): ?TreeNode
-    {
-        if (!self::$compiler) {
-            $path = GeneralUtility::getFileAbsFileName('EXT:graphql/Resources/Private/Grammar/Order.pp');
-            self::$compiler = Llk::load(new Read($path));
-        }
-
-        $expressionNode = self::$compiler->parse($expression);
-
-        return $expressionNode instanceof TreeNode ? $expressionNode : null;
-    }
+    protected $grammar = 'EXT:graphql/Resources/Private/Grammar/Order.pp';
 }

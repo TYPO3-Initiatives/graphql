@@ -21,10 +21,11 @@ trait EntityReaderTestTrait
     /**
      * Sorts a entity reader result by key or by value
      * when the keys are numerical.
-     * 
+     *
      * @param array $result Result to sort
      */
-    protected function sortResult(array &$result) {
+    protected function sortResult(array &$result)
+    {
         if (array_keys($result) === range(0, count($result) - 1)
             && count(array_filter(array_values($result), 'is_array')) === count($result)
         ) {
@@ -49,7 +50,7 @@ trait EntityReaderTestTrait
             }
 
             array_multisort(...$arguments);
-        } else if ([] !== $result) {
+        } else if ($result !== []) {
             ksort($result);
         }
 

@@ -17,6 +17,7 @@ namespace TYPO3\CMS\GraphQL\Type;
  */
 
 use GraphQL\Type\Definition\ScalarType;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\FilterExpressionParser;
 
 /**
@@ -45,11 +46,11 @@ class FilterExpressionType extends ScalarType
 
     public function parseValue($value)
     {
-        return FilterExpressionParser::parse($value);
+        return GeneralUtility::makeInstance(FilterExpressionParser::class)->parse($value);
     }
 
     public function parseLiteral($valueNode, array $variables = null)
     {
-        return FilterExpressionParser::parse($valueNode->value);
+        return GeneralUtility::makeInstance(FilterExpressionParser::class)->parse($valueNode->value);
     }
 }

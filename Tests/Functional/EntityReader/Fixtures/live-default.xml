@@ -188,7 +188,6 @@
 		<scalar_string>String</scalar_string>
 		<scalar_float>-3.1415</scalar_float>
 		<scalar_integer>1</scalar_integer>
-		<scalar_text></scalar_text>
 	</tx_persistence_entity>
 	<tx_persistence_entity>
 		<uid>1028</uid>

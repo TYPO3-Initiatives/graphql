@@ -16,25 +16,13 @@ namespace TYPO3\CMS\GraphQL;
  * The TYPO3 project - inspiring people to share!
  */
 
-use Hoa\Compiler\Llk\Llk;
-use Hoa\Compiler\Llk\TreeNode;
-use Hoa\File\Read;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 /**
  * @internal
  */
-class FilterExpressionParser
+class FilterExpressionParser extends AbstractExpressionParser
 {
-    protected static $compiler;
-
-    public static function parse($filter): TreeNode
-    {
-        if (!self::$compiler) {
-            $path = GeneralUtility::getFileAbsFileName('EXT:graphql/Resources/Private/Grammar/Filter.pp');
-            self::$compiler = Llk::load(new Read($path));
-        }
-
-        return self::$compiler->parse($filter);
-    }
+    /**
+     * @inheritdoc
+     */
+    protected $grammar = 'EXT:graphql/Resources/Private/Grammar/Filter.pp';
 }

@@ -27,6 +27,7 @@ use Webmozart\Assert\Assert;
 
 /**
  * @internal
+ * @todo Implement this as a validation rule
  */
 class OrderExpressionValidator
 {

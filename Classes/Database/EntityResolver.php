@@ -78,7 +78,7 @@ class EntityResolver extends AbstractResolver
 
         $value = $builder->execute()->fetchAll();
         $event = new AfterValueResolvingEvent($value, $source, $arguments, $context, $info, $this);
-        
+
         $dispatcher->dispatch($event);
 
         return $event->getValue();

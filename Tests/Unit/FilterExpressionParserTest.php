@@ -17,6 +17,7 @@ namespace TYPO3\CMS\GraphQL\Tests\Unit;
  */
 
 use Hoa\Compiler\Llk\TreeNode;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\FilterExpressionParser;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
@@ -55,7 +56,8 @@ class FilterExpressionParserTest extends UnitTestCase
     public function parseThrowsSyntaxExceptionForInvalidExpressions($expression)
     {
         $this->expectException(\Hoa\Compiler\Exception\Exception::class);
-        FilterExpressionParser::parse($expression);
+        
+        GeneralUtility::makeInstance(FilterExpressionParser::class)->parse($expression);
     }
 
     public function expressionProvider()
@@ -329,7 +331,7 @@ class FilterExpressionParserTest extends UnitTestCase
                                             ],
                                         ],
                                         [
-                                            'id' => '#parameter',
+                                            'id' => '#variable',
                                             'children' => [
                                                 ['identifier', 'qux'],
                                             ],
@@ -480,7 +482,7 @@ class FilterExpressionParserTest extends UnitTestCase
                                                     ],
                                                 ],
                                                 [
-                                                    'id' => '#parameter',
+                                                    'id' => '#variable',
                                                     'children' => [
                                                         ['identifier', 'bar'],
                                                     ],
@@ -506,7 +508,7 @@ class FilterExpressionParserTest extends UnitTestCase
         $this->assertEquals($this->buildTree([
             'id' => '#expression',
             'children' => [$expected],
-        ]), FilterExpressionParser::parse($expression));
+        ]), GeneralUtility::makeInstance(FilterExpressionParser::class)->parse($expression));
     }
 
     protected function buildTree(array $array)

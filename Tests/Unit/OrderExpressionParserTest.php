@@ -17,6 +17,7 @@ namespace TYPO3\CMS\GraphQL\Tests\Unit;
  */
 
 use Hoa\Compiler\Llk\TreeNode;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\OrderExpressionParser;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
@@ -56,7 +57,8 @@ class OrderExpressionParserTest extends UnitTestCase
     public function parseThrowsSyntaxExceptionForInvalidExpressions($expression)
     {
         $this->expectException(\Hoa\Compiler\Exception\Exception::class);
-        OrderExpressionParser::parse($expression);
+
+        GeneralUtility::makeInstance(OrderExpressionParser::class)->parse($expression);
     }
 
     public function expressionProvider()
@@ -389,7 +391,7 @@ class OrderExpressionParserTest extends UnitTestCase
         $this->assertEquals($this->buildTree([
             'id' => '#expression',
             'children' => $expected,
-        ]), OrderExpressionParser::parse($expression));
+        ]), GeneralUtility::makeInstance(OrderExpressionParser::class)->parse($expression));
     }
 
     protected function buildTree(array $array)
