@@ -75,14 +75,13 @@ class EntitySchemaFactory
 
         foreach ($entityRelationMap->getEntityDefinitions() as $entityDefinition) {
             $type = Type::listOf($this->buildObjectType($entityDefinition));
-            $type->config['meta'] = $entityDefinition;
 
             $name = $entityDefinition->getName();
-            $event = new BeforeFieldArgumentsInitializationEvent($name, $type);
+            $event = new BeforeFieldArgumentsInitializationEvent($name, $entityDefinition, $type);
 
             $dispatcher->dispatch($event);
 
-            $resolver = $this->resolverFactory->create($type);
+            $resolver = $this->resolverFactory->create($entityDefinition, $type);
 
             $query['fields'][$name] = [
                 'type' => $type,
@@ -148,7 +147,7 @@ class EntitySchemaFactory
                         $type = $this->buildFieldType($propertyDefinition);
 
                         $name = $propertyDefinition->getName();
-                        $event = new BeforeFieldArgumentsInitializationEvent($name, $type);
+                        $event = new BeforeFieldArgumentsInitializationEvent($name, $propertyDefinition, $type);
 
                         $this->getEventDispatcher()->dispatch($event);
 
@@ -162,7 +161,7 @@ class EntitySchemaFactory
                         if ($propertyDefinition->isRelationProperty()
                             && !$propertyDefinition->isLanguageRelationProperty()
                         ) {
-                            $resolver = $this->resolverFactory->create($type);
+                            $resolver = $this->resolverFactory->create($propertyDefinition, $type);
 
                             $field['args'] = array_replace_recursive(
                                 $resolver->getArguments(),
@@ -190,15 +189,10 @@ class EntitySchemaFactory
         return $objectType;
     }
 
-    /**
-     * @todo Remove field specific `meta` from generic type configuration.
-     */
     protected function buildFieldType(PropertyDefinition $propertyDefinition): Type
     {
         $type = $propertyDefinition->isRelationProperty()
             ? $this->buildCompositeFieldType($propertyDefinition) : $this->buildScalarFieldType($propertyDefinition);
-
-        $type->config['meta'] = $propertyDefinition;
 
         return $type;
     }

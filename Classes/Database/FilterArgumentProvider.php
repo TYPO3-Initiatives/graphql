@@ -33,14 +33,8 @@ class FilterArgumentProvider
 
     public function __invoke(BeforeFieldArgumentsInitializationEvent $event): void
     {
-        $type = $event->getType();
+        $meta = $event->getElement();
 
-        if (!isset($type->config['meta'])) {
-            return;
-        }
-        
-        $meta = $type->config['meta'];
-        
         if (!$meta instanceof PropertyDefinition && !$meta instanceof EntityDefinition) {
             return;
         }

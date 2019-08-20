@@ -39,13 +39,7 @@ class OrderQueryHandler
             return;
         }
 
-        $type = $event->getResolver()->getType();
-
-        if (!isset($type->config['meta'])) {
-            return;
-        }
-        
-        $meta = $type->config['meta'];
+        $meta = $event->getResolver()->getElement();
         
         if (!$meta instanceof PropertyDefinition && !$meta instanceof EntityDefinition) {
             return;
@@ -56,7 +50,7 @@ class OrderQueryHandler
         $tables = array_flip(QueryHelper::getQueriedTables($builder));
         $expression = $arguments[OrderArgumentProvider::ARGUMENT_NAME] ?? null;
 
-        $items = GeneralUtility::makeInstance(OrderExpressionTraversable::class, $type, $expression);
+        $items = GeneralUtility::makeInstance(OrderExpressionTraversable::class, $meta, $expression);
 
         foreach ($items as $item) {
             if (!isset($tables[$item['constraint']])) {

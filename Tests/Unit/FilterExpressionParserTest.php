@@ -22,10 +22,15 @@ use TYPO3\CMS\GraphQL\FilterExpressionParser;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /*
-* Test case
-*/
+ * Test case
+ */
 class FilterExpressionParserTest extends UnitTestCase
 {
+    /**
+     * @inheritdoc
+     */
+    protected $resetSingletonInstances = true;
+
     public function invalidExpressionProvider()
     {
         return [

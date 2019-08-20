@@ -22,10 +22,15 @@ use TYPO3\CMS\GraphQL\OrderExpressionParser;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 /*
-* Test case
-*/
+ * Test case
+ */
 class OrderExpressionParserTest extends UnitTestCase
 {
+    /**
+     * @inheritdoc
+     */
+    protected $resetSingletonInstances = true;
+
     public function invalidExpressionProvider()
     {
         return [

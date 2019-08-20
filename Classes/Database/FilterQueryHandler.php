@@ -36,14 +36,8 @@ class FilterQueryHandler
             return;
         }
 
-        $type = $event->getResolver()->getType();
+        $meta = $event->getResolver()->getElement();
 
-        if (!isset($type->config['meta'])) {
-            return;
-        }
-        
-        $meta = $type->config['meta'];
-        
         if (!$meta instanceof PropertyDefinition && !$meta instanceof EntityDefinition) {
             return;
         }

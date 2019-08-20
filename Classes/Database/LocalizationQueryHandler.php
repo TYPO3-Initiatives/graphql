@@ -36,13 +36,7 @@ class LocalizationQueryHandler
             return;
         }
 
-        $type = $event->getResolver()->getType();
-
-        if (!isset($type->config['meta'])) {
-            return;
-        }
-
-        $meta = $type->config['meta'];
+        $meta = $event->getResolver()->getElement();
         
         if (!$meta instanceof EntityDefinition) {
             return;

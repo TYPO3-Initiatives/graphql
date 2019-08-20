@@ -19,6 +19,7 @@ namespace TYPO3\CMS\GraphQL\Database;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\GraphQL\Event\AfterValueResolvingEvent;
@@ -33,15 +34,13 @@ class PassiveManyToManyRelationshipResolver extends AbstractPassiveRelationshipR
     /**
      * @inheritdoc
      */
-    public static function canResolve(Type $type): bool
+    public static function canResolve(ElementInterface $element, Type $type): bool
     {
-        if (!isset($type->config['meta']) || !$type->config['meta'] instanceof PropertyDefinition) {
+        if (!$element instanceof PropertyDefinition) {
             return false;
         }
 
-        $propertyDefinition = $type->config['meta'];
-
-        return $propertyDefinition->isManyToManyRelationProperty();
+        return $element->isManyToManyRelationProperty();
     }
 
     /**

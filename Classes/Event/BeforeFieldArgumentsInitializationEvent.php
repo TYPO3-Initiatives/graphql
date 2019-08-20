@@ -17,6 +17,7 @@ namespace TYPO3\CMS\GraphQL\Event;
  */
 
 use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 
 /**
  * @internal
@@ -29,6 +30,11 @@ final class BeforeFieldArgumentsInitializationEvent
     private $name;
 
     /**
+     * @var ElementInterface
+     */
+    private $element;
+
+    /**
      * @var Type
      */
     private $type;
@@ -38,9 +44,10 @@ final class BeforeFieldArgumentsInitializationEvent
      */
     private $arguments;
 
-    public function __construct(string $name, Type $type)
+    public function __construct(string $name, ElementInterface $element, Type $type)
     {
         $this->name = $name;
+        $this->element = $element;
         $this->type = $type;
         $this->arguments = [];
     }
@@ -48,6 +55,11 @@ final class BeforeFieldArgumentsInitializationEvent
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getElement(): ElementInterface
+    {
+        return $this->element;
     }
 
     public function getType(): Type

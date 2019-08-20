@@ -18,6 +18,7 @@ namespace TYPO3\CMS\GraphQL;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\MultiplicityConstraint;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use TYPO3\CMS\Core\Exception;
@@ -37,11 +38,11 @@ abstract class AbstractRelationshipResolver extends AbstractResolver implements 
      */
     protected $multiplicityConstraint;
 
-    public function __construct(Type $type)
+    public function __construct(ElementInterface $element, Type $type)
     {
-        parent::__construct($type);
+        parent::__construct($element, $type);
 
-        $this->propertyDefinition = $type->config['meta'];
+        $this->propertyDefinition = $element;
 
         foreach ($this->propertyDefinition->getConstraints() as $constraint) {
             if ($constraint instanceof MultiplicityConstraint) {

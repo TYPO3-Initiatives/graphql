@@ -18,6 +18,7 @@ namespace TYPO3\CMS\GraphQL\Database;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -39,9 +40,9 @@ class EntityResolver extends AbstractResolver
     /**
      * @inheritdoc
      */
-    public static function canResolve(Type $type): bool
+    public static function canResolve(ElementInterface $element, Type $type): bool
     {
-        if (!isset($type->config['meta']) || !$type->config['meta'] instanceof EntityDefinition) {
+        if (!$element instanceof EntityDefinition) {
             return false;
         }
 
@@ -51,11 +52,11 @@ class EntityResolver extends AbstractResolver
     /**
      * @inheritdoc
      */
-    public function __construct(Type $type)
+    public function __construct(ElementInterface $element, Type $type)
     {
-        parent::__construct($type);
+        parent::__construct($element, $type);
 
-        $this->entityDefinition = $type->config['meta'];
+        $this->entityDefinition = $element;
     }
 
     /**

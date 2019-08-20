@@ -16,9 +16,9 @@ namespace TYPO3\CMS\GraphQL\Database;
  * The TYPO3 project - inspiring people to share!
  */
 
-use GraphQL\Type\Definition\Type;
 use Hoa\Compiler\Llk\TreeNode;
 use IteratorAggregate;
+use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
 use Webmozart\Assert\Assert;
@@ -59,9 +59,9 @@ class OrderExpressionTraversable implements IteratorAggregate
     ];
 
     /**
-     * @var Type
+     * @var ElementInterface
      */
-    protected $type;
+    protected $element;
 
     /**
      * @var TreeNode
@@ -69,30 +69,22 @@ class OrderExpressionTraversable implements IteratorAggregate
     protected $expression;
 
     /**
-     * @var string[]
-     */
-    protected $types;
-
-    /**
      * @var int
      */
     protected $mode;
 
-    public function __construct(Type $type, ?TreeNode $expression, int $mode = self::MODE_SQL)
+    public function __construct(ElementInterface $element, ?TreeNode $expression, int $mode = self::MODE_SQL)
     {
-        Assert::keyExists($type->config, 'meta');
-        Assert::isInstanceOfAny($type->config['meta'], [EntityDefinition::class, PropertyDefinition::class]);
+        Assert::isInstanceOfAny($element, [EntityDefinition::class, PropertyDefinition::class]);
         Assert::oneOf($mode, [self::MODE_SQL, self::MODE_GQL]);
 
-        $this->type = $type;
+        $this->element = $element;
         $this->expression = $expression;
         $this->mode = $mode;
     }
 
     public function getIterator()
     {
-        $meta = $this->type->config['meta'];
-
         if (!$this->expression) {
             return;
         }
@@ -105,10 +97,10 @@ class OrderExpressionTraversable implements IteratorAggregate
 
             if ($item->getChildrenNumber() > 2) {
                 $constraints = [$item->getChild(1)->getChild(0)->getValueValue()];
-            } elseif ($this->mode == self::MODE_SQL && $meta instanceof EntityDefinition) {
-                $constraints = [$meta->getName()];
-            } elseif ($this->mode == self::MODE_SQL && $meta instanceof PropertyDefinition) {
-                $constraints = $meta->getRelationTableNames();
+            } elseif ($this->mode == self::MODE_SQL && $this->element instanceof EntityDefinition) {
+                $constraints = [$this->element->getName()];
+            } elseif ($this->mode == self::MODE_SQL && $this->element instanceof PropertyDefinition) {
+                $constraints = $this->element->getRelationTableNames();
             }
 
             foreach ($constraints as $constraint) {

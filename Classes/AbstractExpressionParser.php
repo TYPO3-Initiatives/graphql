@@ -46,9 +46,10 @@ abstract class AbstractExpressionParser implements SingletonInterface
     public function __construct()
     {
         $path = GeneralUtility::getFileAbsFileName($this->grammar);
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
 
         $this->parser = Llk::load(new Read($path));
-        $this->cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('gql');
+        $this->cache = $cacheManager->hasCache('gql') ? $cacheManager->getCache('gql') : null;
     }
 
     /**
@@ -61,17 +62,21 @@ abstract class AbstractExpressionParser implements SingletonInterface
      */
     public function parse(string $expression): TreeNode
     {
-        $key = $this->getCacheIdentifier($expression);
+        if ($this->cache !== null) {
+            $key = $this->getCacheIdentifier($expression);
 
-        if (!$this->cache->has($key)) {
-            $this->cache->set($key, $this->parser->parse($expression));
+            if (!$this->cache->has($key)) {
+                $this->cache->set($key, $this->parser->parse($expression));
+            }
+
+            return $this->cache->get($key);
         }
 
-        return $this->cache->get($key);
+        return $this->parser->parse($expression);
     }
 
     protected function getCacheIdentifier($expression): string
     {
-        return \spl_object_hash($this) . '_' . sha1($expression);
+        return sha1(\spl_object_hash($this) . $expression);
     }
 }

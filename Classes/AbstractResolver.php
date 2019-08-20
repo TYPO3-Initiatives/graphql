@@ -18,6 +18,7 @@ namespace TYPO3\CMS\GraphQL;
 
 use GraphQL\Type\Definition\Type;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -26,6 +27,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 abstract class AbstractResolver implements ResolverInterface
 {
+    /**
+     * @var ElementInterface
+     */
+    protected $element;
+
     /**
      * @var Type
      */
@@ -36,8 +42,9 @@ abstract class AbstractResolver implements ResolverInterface
      */
     protected $handlers;
 
-    public function __construct(Type $type)
+    public function __construct(ElementInterface $element, Type $type)
     {
+        $this->element = $element;
         $this->type = $type;
         $this->handlers = [];
     }
@@ -56,6 +63,14 @@ abstract class AbstractResolver implements ResolverInterface
     public function getType(): Type
     {
         return $this->type;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getElement(): ElementInterface
+    {
+        return $this->element;
     }
 
     protected function getEventDispatcher(): EventDispatcherInterface

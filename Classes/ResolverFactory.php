@@ -17,6 +17,7 @@ namespace TYPO3\CMS\GraphQL;
  */
 
 use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -31,16 +32,16 @@ class ResolverFactory implements SingletonInterface
      *
      * @param Type $type Type to create a resolver for
      */
-    public function create(Type $type)
+    public function create(ElementInterface $element, Type $type)
     {
         foreach ($GLOBALS['TYPO3_CONF_VARS']['SYS']['gql']['resolver'] as $resolver) {
-            if ($resolver::canResolve($type)) {
-                return GeneralUtility::makeInstance($resolver, $type);
+            if ($resolver::canResolve($element, $type)) {
+                return GeneralUtility::makeInstance($resolver, $element, $type);
             }
         }
 
         throw new Exception(
-            sprintf('No resolver found for type "%s"', $type),
+            sprintf('No resolver found for type "%s".', $type),
             1563841825
         );
     }

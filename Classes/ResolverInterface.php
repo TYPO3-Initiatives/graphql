@@ -18,6 +18,7 @@ namespace TYPO3\CMS\GraphQL;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
+use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 
 /**
  * Fetches data of a single query field.
@@ -32,14 +33,14 @@ interface ResolverInterface
      * @param Type $type Type to resolve
      * @return bool
      */
-    public static function canResolve(Type $type): bool;
+    public static function canResolve(ElementInterface $element, Type $type): bool;
 
     /**
      * Creates a resolver.
      *
      * @param Type $type Type to create the resolver for
      */
-    public function __construct(Type $type);
+    public function __construct(ElementInterface $element, Type $type);
 
     /**
      * Returns the data of the query field.
@@ -52,6 +53,13 @@ interface ResolverInterface
      * @see https://graphql.org/learn/execution/
      */
     public function resolve($source, array $arguments, array $context, ResolveInfo $info);
+
+    /**
+     * Returns the type handled by this resolver.
+     *
+     * @return ElementInterface
+     */
+    public function getElement(): ElementInterface;
 
     /**
      * Returns the type handled by this resolver.

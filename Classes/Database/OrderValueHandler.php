@@ -37,14 +37,8 @@ class OrderValueHandler
             return;
         }
 
-        $type = $event->getResolver()->getType();
+        $meta = $event->getResolver()->getElement();
 
-        if (!isset($type->config['meta'])) {
-            return;
-        }
-        
-        $meta = $type->config['meta'];
-        
         if (!$meta instanceof PropertyDefinition) {
             return;
         }
@@ -64,7 +58,7 @@ class OrderValueHandler
 
         $items = GeneralUtility::makeInstance(
             OrderExpressionTraversable::class,
-            $type,
+            $meta,
             $expression,
             OrderExpressionTraversable::MODE_GQL
         );

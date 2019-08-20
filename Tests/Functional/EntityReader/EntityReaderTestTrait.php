@@ -30,24 +30,27 @@ trait EntityReaderTestTrait
             && count(array_filter(array_values($result), 'is_array')) === count($result)
         ) {
             $keys = [];
-            $arguments = [&$result];
+            $arguments = [];
 
             foreach ($result as $value) {
                 $keys = array_merge($keys, array_keys($value));
             }
-            
+
             $keys = array_unique($keys);
-            
+
+            sort($keys);
+
             foreach ($keys as $key) {
                 $column = [];
                 
                 foreach ($result as $value) {
-                    $column[] = $value[$key] ?? null;
+                    $column[] = $value[$key] ?? '';
                 }
 
                 $arguments[] = $column;
-                $arguments[] = SORT_ASC;
             }
+
+            $arguments[] = &$result;
 
             array_multisort(...$arguments);
         } else if ($result !== []) {
