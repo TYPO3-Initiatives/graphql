@@ -36,7 +36,7 @@
         "typo3/cms": "*"
     },
     "replace": {
-        "typo3/cms-graphql": "self.version"
+        "graphql": "self.version"
     },
     "extra": {
         "branch-alias": {
