@@ -21,8 +21,8 @@
         }
     ],
     "require": {
-        "typo3/cms-core": "10.0.*@dev",
-        "typo3/cms-configuration": "10.0.*@dev",
+        "typo3/cms-core": "10.1.*@dev",
+        "typo3/cms-configuration": "10.1.*@dev",
         "hoa/compiler": "^3.0",
         "webmozart/assert": "^1.0",
         "webonyx/graphql-php": "^0.13"
@@ -40,7 +40,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "10.0.x-dev"
+            "dev-master": "10.1.x-dev"
         },
         "typo3/cms": {
             "extension-key": "graphql",
