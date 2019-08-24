@@ -57,12 +57,14 @@ abstract class AbstractPassiveRelationshipResolver extends AbstractRelationshipR
 
     protected function getValue(?array $value): ?array
     {
+        $minimum = $this->getMultiplicityConstraint()->getMinimum();
+        $maximum = $this->getMultiplicityConstraint()->getMaximum();
+
         if (empty($value)) {
-            return $this->getMultiplicityConstraint()->getMinimum() > 0
-                || $this->getMultiplicityConstraint()->getMaximum() > 1 ? [] : null;
+            return $minimum > 0 || $maximum > 1 || $maximum === null ? [] : null;
         }
 
-        return $this->getMultiplicityConstraint()->getMaximum() > 1 ? $value : $value[0];
+        return $maximum > 1 || $maximum === null ? $value : $value[0];
     }
 
     protected function getCacheIdentifier($identifier): string
