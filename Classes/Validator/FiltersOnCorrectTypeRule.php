@@ -54,7 +54,7 @@ class FiltersOnCorrectTypeRule extends ValidationRule
             NodeKind::OPERATION_DEFINITION => [
                 'enter' => function () {
                     $this->variableDefinitions = [];
-                    $this->variableUsages = [];
+                    $this->filterUsages = [];
                 },
                 'leave' => function (OperationDefinitionNode $operation) use ($context) {
                     $operationName = $operation->name ? $operation->name->value : null;
