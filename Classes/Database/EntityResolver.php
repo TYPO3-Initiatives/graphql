@@ -20,10 +20,12 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\AbstractResolver;
+use TYPO3\CMS\GraphQL\Database\Query\ContextAwareQueryBuilder;
 use TYPO3\CMS\GraphQL\Event\AfterValueResolvingEvent;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
 
@@ -64,7 +66,7 @@ class EntityResolver extends AbstractResolver
      */
     public function resolve($source, array $arguments, array $context, ResolveInfo $info): ?array
     {
-        $builder = $this->getBuilder($info);
+        $builder = $this->getBuilder($info, $context['context']);
         $dispatcher = $this->getEventDispatcher();
 
         $dispatcher->dispatch(
@@ -85,12 +87,19 @@ class EntityResolver extends AbstractResolver
         return $event->getValue();
     }
 
-    protected function getBuilder(ResolveInfo $info): QueryBuilder
+    protected function getBuilder(ResolveInfo $info, ?Context $context): QueryBuilder
     {
         $table = $this->getTable();
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
 
-        $builder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable($table);
+        $builder = $context === null ? GeneralUtility::makeInstance(
+            QueryBuilder::class,
+            $connection
+        ) : GeneralUtility::makeInstance(
+            ContextAwareQueryBuilder::class,
+            $connection,
+            $context
+        );
 
         $builder->getRestrictions()
             ->removeAll();

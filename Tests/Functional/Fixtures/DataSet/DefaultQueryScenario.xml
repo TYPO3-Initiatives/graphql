@@ -18,6 +18,20 @@
 		<sorting>768</sorting>
 		<title>Page 1.2</title>
 	</pages>
+	<pages>
+		<uid>135</uid>
+		<pid>128</pid>
+		<sorting>1024</sorting>
+		<hidden>1</hidden>
+		<title>Page 1.3</title>
+	</pages>
+	<pages>
+		<uid>136</uid>
+		<pid>128</pid>
+		<sorting>1152</sorting>
+		<deleted>1</deleted>
+		<title>Page 1.4</title>
+	</pages>
 	<tt_content>
 		<uid>512</uid>
 		<pid>128</pid>
@@ -197,6 +211,14 @@
 		<scalar_float>0</scalar_float>
 		<scalar_integer>0</scalar_integer>
 		<scalar_text>Text</scalar_text>
+	</tx_persistence_entity>
+	<tx_persistence_entity>
+		<uid>1034</uid>
+		<pid>128</pid>
+		<sorting>1408</sorting>
+		<endtime>1567207941</endtime>
+		<title>Entity 6</title>
+		<scalar_integer>1</scalar_integer>
 	</tx_persistence_entity>
 	<tx_persistence_entity_mm>
 		<uid_local>1024</uid_local>

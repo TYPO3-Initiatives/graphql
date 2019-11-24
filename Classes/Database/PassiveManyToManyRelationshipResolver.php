@@ -21,6 +21,7 @@ use GraphQL\Type\Definition\Type;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\GraphQL\Event\AfterValueResolvingEvent;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
@@ -66,7 +67,7 @@ class PassiveManyToManyRelationshipResolver extends AbstractPassiveRelationshipR
 
         if (!$context['cache']->has($bufferIdentifier)) {
             foreach ($this->getPropertyDefinition()->getRelationTableNames() as $table) {
-                $builder = $this->getBuilder($info, $table, $keys);
+                $builder = $this->getBuilder($info, $context['context'], $table, $keys);
 
                 $dispatcher->dispatch(
                     new BeforeValueResolvingEvent(
@@ -111,9 +112,9 @@ class PassiveManyToManyRelationshipResolver extends AbstractPassiveRelationshipR
      * @todo Make `tablenames` depended from the meta configuration.
      * @todo Create another test case were `tablenames` is not used.
      */
-    protected function getBuilder(ResolveInfo $info, string $table, array $keys): QueryBuilder
+    protected function getBuilder(ResolveInfo $info, ?Context $context, string $table, array $keys): QueryBuilder
     {
-        $builder = parent::getBuilder($info, $table, $keys);
+        $builder = parent::getBuilder($info, $context, $table, $keys);
 
         $builder->innerJoin(
             $table,

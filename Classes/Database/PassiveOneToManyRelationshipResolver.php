@@ -22,6 +22,7 @@ use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\ActivePropertyRelation;
 use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\GraphQL\Event\AfterValueResolvingEvent;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
@@ -75,7 +76,7 @@ class PassiveOneToManyRelationshipResolver extends AbstractPassiveRelationshipRe
 
         if (!$context['cache']->has($bufferIdentifier)) {
             $table =$this->getTable();
-            $builder = $this->getBuilder($info, $table, $keys);
+            $builder = $this->getBuilder($info, $context['context'], $table, $keys);
             $dispatcher = $this->getEventDispatcher();
 
             $dispatcher->dispatch(

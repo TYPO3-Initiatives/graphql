@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace TYPO3\CMS\GraphQL\Tests\Functional\EntityReader;
+namespace TYPO3\CMS\GraphQL\Tests\Functional;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -30,7 +30,7 @@ trait EntityReaderTestTrait
             && count(array_filter(array_values($result), 'is_array')) === count($result)
         ) {
             $keys = [];
-            $arguments = [];
+            $arguments[] = &$result;
 
             foreach ($result as $value) {
                 $keys = array_merge($keys, array_keys($value));
@@ -47,10 +47,9 @@ trait EntityReaderTestTrait
                     $column[] = $value[$key] ?? '';
                 }
 
+                $arguments[] = SORT_ASC;
                 $arguments[] = $column;
             }
-
-            $arguments[] = &$result;
 
             array_multisort(...$arguments);
         } else if ($result !== []) {

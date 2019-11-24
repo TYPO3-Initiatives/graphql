@@ -19,11 +19,13 @@ namespace TYPO3\CMS\GraphQL\Database;
 use Doctrine\DBAL\ParameterType;
 use GraphQL\Type\Definition\ResolveInfo;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\AbstractRelationshipResolver;
+use TYPO3\CMS\GraphQL\Database\Query\ContextAwareQueryBuilder;
 use TYPO3\CMS\GraphQL\EntitySchemaFactory;
 use Webmozart\Assert\Assert;
 
@@ -79,10 +81,18 @@ abstract class AbstractPassiveRelationshipResolver extends AbstractRelationshipR
         ];
     }
 
-    protected function getBuilder(ResolveInfo $info, string $table, array $keys): QueryBuilder
+    protected function getBuilder(ResolveInfo $info, ?Context $context, string $table, array $keys): QueryBuilder
     {
-        $builder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable($table);
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
+
+        $builder = $context === null ? GeneralUtility::makeInstance(
+            QueryBuilder::class,
+            $connection
+        ) : GeneralUtility::makeInstance(
+            ContextAwareQueryBuilder::class,
+            $connection,
+            $context
+        );
 
         $builder->getRestrictions()
             ->removeAll();

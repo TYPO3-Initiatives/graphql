@@ -14,6 +14,9 @@ return [
         'delete' => 'deleted',
         'enablecolumns' => [
             'disabled' => 'hidden',
+            'starttime' => 'starttime',
+            'endtime' => 'endtime',
+            'fe_group' => 'fe_group'
         ],
         'versioningWS' => true,
         'origUid' => 't3_origuid',

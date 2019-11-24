@@ -23,11 +23,13 @@ use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\ActiveEntityRelation;
 use TYPO3\CMS\Core\Configuration\MetaModel\ElementInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\PropertyDefinition;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\GraphQL\AbstractRelationshipResolver;
+use TYPO3\CMS\GraphQL\Database\Query\ContextAwareQueryBuilder;
 use TYPO3\CMS\GraphQL\EntitySchemaFactory;
 use TYPO3\CMS\GraphQL\Event\AfterValueResolvingEvent;
 use TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent;
@@ -119,7 +121,7 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
             $foreignKeyField = '__' . $this->getForeignKeyField();
 
             foreach ($this->getPropertyDefinition()->getRelationTableNames() as $table) {
-                $builder = $this->getBuilder($info, $table, $keys);
+                $builder = $this->getBuilder($info, $context['context'], $table, $keys);
 
                 $dispatcher->dispatch(
                     new BeforeValueResolvingEvent(
@@ -170,10 +172,18 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
         return \spl_object_hash($this) . '_' . $identifier;
     }
 
-    protected function getBuilder(ResolveInfo $info, string $table, array $keys): QueryBuilder
+    protected function getBuilder(ResolveInfo $info, ?Context $context, string $table, array $keys): QueryBuilder
     {
-        $builder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable($table);
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($table);
+
+        $builder = $context === null ? GeneralUtility::makeInstance(
+            QueryBuilder::class,
+            $connection
+        ) : GeneralUtility::makeInstance(
+            ContextAwareQueryBuilder::class,
+            $connection,
+            $context
+        );
 
         $builder->getRestrictions()
             ->removeAll();

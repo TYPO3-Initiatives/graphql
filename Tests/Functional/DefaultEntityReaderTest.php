@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace TYPO3\CMS\GraphQL\Tests\Functional\EntityReader;
+namespace TYPO3\CMS\GraphQL\Tests\Functional;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -23,7 +23,7 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 /**
  * Test case
  */
-class LiveDefaultTest extends FunctionalTestCase
+class DefaultEntityReaderTest extends FunctionalTestCase
 {
     use EntityReaderTestTrait;
 
@@ -32,13 +32,13 @@ class LiveDefaultTest extends FunctionalTestCase
      */
     protected $testExtensionsToLoad = [
         'typo3/sysext/graphql',
-        'typo3/sysext/graphql/Tests/Functional/EntityReader/Extensions/persistence',
+        'typo3/sysext/graphql/Tests/Functional/Fixtures/Extensions/persistence',
     ];
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->importDataSet(__DIR__ . '/Fixtures/live-default.xml');
+        $this->importDataSet(__DIR__ . '/Fixtures/DataSet/DefaultQueryScenario.xml');
     }
 
     public function scalarPropertyQueryProvider()
@@ -1218,6 +1218,146 @@ class LiveDefaultTest extends FunctionalTestCase
      * @dataProvider filterRestrictedQueryProvider
      */
     public function readFilterRestricted(string $query, array $variables, array $expected)
+    {
+        $reader = new EntityReader();
+        $result = $reader->execute($query, $variables);
+
+        $this->sortResult($expected);
+        $this->sortResult($result);
+
+        $this->assertEqualsCanonicalizing($expected, $result);
+    }
+
+    public function restrictedQueryProvider()
+    {
+        return [
+            [
+                '{
+                    pages (restrictions: {}) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'pages' => [
+                            [
+                                'uid' => '128'
+                            ],
+                            [
+                                'uid' => '129'
+                            ],
+                            [
+                                'uid' => '130'
+                            ],
+                            [
+                                'uid' => '135'
+                            ],
+                            [
+                                'uid' => '136'
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages (restrictions: {
+                        deleted: {}
+                    }) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'pages' => [
+                            [
+                                'uid' => '128'
+                            ],
+                            [
+                                'uid' => '129'
+                            ],
+                            [
+                                'uid' => '130'
+                            ],
+                            [
+                                'uid' => '135'
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    pages (restrictions: {
+                        hidden: {}
+                    }) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'pages' => [
+                            [
+                                'uid' => '128'
+                            ],
+                            [
+                                'uid' => '129'
+                            ],
+                            [
+                                'uid' => '130'
+                            ],
+                            [
+                                'uid' => '136'
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                '{
+                    tx_persistence_entity (restrictions: {
+                        end_time: {access_time_stamp: 1567207940}
+                    }) {
+                        uid
+                    }
+                }',
+                [],
+                [
+                    'data' => [
+                        'pages' => [
+                            [
+                                'uid' => '1024'
+                            ],
+                            [
+                                'uid' => '1025'
+                            ],
+                            [
+                                'uid' => '1026'
+                            ],
+                            [
+                                'uid' => '1027'
+                            ],
+                            [
+                                'uid' => '1028'
+                            ],
+                            [
+                                'uid' => '1034'
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider restrictedQueryProvider
+     */
+    public function readRestricted(string $query, array $variables, array $expected)
     {
         $reader = new EntityReader();
         $result = $reader->execute($query, $variables);

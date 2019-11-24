@@ -21,6 +21,13 @@ services:
         identifier: 'entity-query-order'
         event: TYPO3\CMS\GraphQL\Event\BeforeFieldArgumentsInitializationEvent
 
+  TYPO3\CMS\GraphQL\Database\RestrictionsArgumentProvider:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-restrictions'
+        event: TYPO3\CMS\GraphQL\Event\BeforeFieldArgumentsInitializationEvent
+
   TYPO3\CMS\GraphQL\Database\FieldQueryHandler:
     tags:
       -
@@ -35,14 +42,6 @@ services:
         identifier: 'entity-query-filter'
         event: TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent
 
-  TYPO3\CMS\GraphQL\Database\LocalizationQueryHandler:
-    tags:
-      -
-        name: event.listener
-        identifier: 'entity-query-localization'
-        event: TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent
-        before: 'entity-query-filter, entity-query-field, entity-query-order'
-
   TYPO3\CMS\GraphQL\Database\OrderQueryHandler:
     tags:
       -
@@ -56,3 +55,10 @@ services:
         name: event.listener
         identifier: 'entity-query-order'
         event: TYPO3\CMS\GraphQL\Event\AfterValueResolvingEvent
+
+  TYPO3\CMS\GraphQL\Database\RestrictionsQueryHandler:
+    tags:
+      -
+        name: event.listener
+        identifier: 'entity-query-restrictions'
+        event: TYPO3\CMS\GraphQL\Event\BeforeValueResolvingEvent

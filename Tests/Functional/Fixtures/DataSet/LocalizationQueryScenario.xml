@@ -60,6 +60,7 @@
 		<sys_language_uid>2</sys_language_uid>
 		<uid_local>5</uid_local>
 		<uid_foreign>1029</uid_foreign>
+		<l10n_parent>257</l10n_parent>
 		<tablenames>tx_persistence_entity</tablenames>
 		<fieldname>relation_inline_1n_file_reference</fieldname>
 		<sorting_foreign>256</sorting_foreign>
@@ -72,6 +73,7 @@
 		<sys_language_uid>2</sys_language_uid>
 		<uid_local>6</uid_local>
 		<uid_foreign>1029</uid_foreign>
+		<l10n_parent>258</l10n_parent>
 		<tablenames>tx_persistence_entity</tablenames>
 		<fieldname>relation_inline_1n_file_reference</fieldname>
 		<sorting_foreign>512</sorting_foreign>

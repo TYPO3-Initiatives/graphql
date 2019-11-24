@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace TYPO3\CMS\GraphQL\Tests\Functional\EntityReader;
+namespace TYPO3\CMS\GraphQL\Tests\Functional;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -24,7 +24,7 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 /**
  * Test case
  */
-class LiveLocalizationTest extends FunctionalTestCase
+class LocalizationEntityReaderTest extends FunctionalTestCase
 {
     use EntityReaderTestTrait;
 
@@ -33,14 +33,14 @@ class LiveLocalizationTest extends FunctionalTestCase
      */
     protected $testExtensionsToLoad = [
         'typo3/sysext/graphql',
-        'typo3/sysext/graphql/Tests/Functional/EntityReader/Extensions/persistence',
+        'typo3/sysext/graphql/Tests/Functional/Fixtures/Extensions/persistence',
     ];
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->importDataSet(__DIR__ . '/Fixtures/live-default.xml');
-        $this->importDataSet(__DIR__ . '/Fixtures/live-localization.xml');
+        $this->importDataSet(__DIR__ . '/Fixtures/DataSet/DefaultQueryScenario.xml');
+        $this->importDataSet(__DIR__ . '/Fixtures/DataSet/LocalizationQueryScenario.xml');
     }
 
     public function scalarPropertyQueryProvider()
