@@ -42,7 +42,7 @@ abstract class AbstractPassiveRelationshipResolver extends AbstractRelationshipR
         Assert::keyExists($context, 'cache');
         Assert::isInstanceOf($context['cache'], FrontendInterface::class);
 
-        $keysIdentifier = $this->getCacheIdentifier('keys');
+        $keysIdentifier = $this->getCacheIdentifier($info['query'], 'keys');
         $keys = $context['cache']->get($keysIdentifier) ?: [];
 
         if ($source !== null) {
@@ -69,9 +69,9 @@ abstract class AbstractPassiveRelationshipResolver extends AbstractRelationshipR
         return $maximum > 1 || $maximum === null ? $value : $value[0];
     }
 
-    protected function getCacheIdentifier($identifier): string
+    protected function getCacheIdentifier(string $query, string $identifier): string
     {
-        return \spl_object_hash($this) . '_' . $identifier;
+        return $query . '_' . $identifier;
     }
 
     protected function getBufferIndexes(array $row): array

@@ -59,10 +59,10 @@ class PassiveManyToManyRelationshipResolver extends AbstractPassiveRelationshipR
 
         $dispatcher = $this->getEventDispatcher();
 
-        $bufferIdentifier = $this->getCacheIdentifier('buffer');
+        $bufferIdentifier = $this->getCacheIdentifier($info['query'], 'buffer');
         $buffer = $context['cache']->get($bufferIdentifier) ?: [];
 
-        $keysIdentifier = $this->getCacheIdentifier('keys');
+        $keysIdentifier = $this->getCacheIdentifier($info['query'], 'keys');
         $keys = $context['cache']->get($keysIdentifier) ?? [];
 
         if (!$context['cache']->has($bufferIdentifier)) {

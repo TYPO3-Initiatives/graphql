@@ -72,7 +72,7 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
 
         $column = $this->getPropertyDefinition()->getName();
 
-        $keysIdentifier = $this->getCacheIdentifier('keys');
+        $keysIdentifier = $this->getCacheIdentifier($info['query'], 'keys');
         $keys = $context['cache']->get($keysIdentifier) ?: [];
 
         if ($source !== null) {
@@ -106,10 +106,10 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
 
         $dispatcher = $this->getEventDispatcher();
 
-        $bufferIdentifier = $this->getCacheIdentifier('buffer');
+        $bufferIdentifier = $this->getCacheIdentifier($info['query'], 'buffer');
         $buffer = $context['cache']->get($bufferIdentifier) ?: [];
 
-        $keysIdentifier = $this->getCacheIdentifier('keys');
+        $keysIdentifier = $this->getCacheIdentifier($info['query'], 'keys');
         $keys = $context['cache']->get($keysIdentifier) ?: [];
 
         $column = $this->getPropertyDefinition()->getName();
@@ -167,9 +167,9 @@ class ActiveRelationshipResolver extends AbstractRelationshipResolver
         return $maximum > 1 || $maximum === null ? $value : $value[0];
     }
 
-    protected function getCacheIdentifier($identifier): string
+    protected function getCacheIdentifier(string $query, string $identifier): string
     {
-        return \spl_object_hash($this) . '_' . $identifier;
+        return $query . '_' . $identifier;
     }
 
     protected function getBuilder(ResolveInfo $info, ?Context $context, string $table, array $keys): QueryBuilder

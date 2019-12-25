@@ -53,14 +53,14 @@ class EntityReader implements \TYPO3\CMS\Core\SingletonInterface
 
     public function execute(string $query, array $bindings = [], Context $context = null): array
     {
-        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('gql');
-        $cache->flush();
+        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('runtime');
 
         return GraphQL::executeQuery(
             self::$schema,
             $query,
             null,
             [
+                'query' => uniqid(),
                 'cache' => $cache,
                 'context' => $context,
             ],

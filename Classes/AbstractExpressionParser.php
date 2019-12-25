@@ -77,6 +77,6 @@ abstract class AbstractExpressionParser implements SingletonInterface
 
     protected function getCacheIdentifier($expression): string
     {
-        return sha1(\spl_object_hash($this) . $expression);
+        return sha1($expression);
     }
 }

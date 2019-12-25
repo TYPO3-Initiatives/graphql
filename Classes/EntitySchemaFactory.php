@@ -22,6 +22,7 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
+use GraphQL\Utils\SchemaPrinter;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityDefinition;
 use TYPO3\CMS\Core\Configuration\MetaModel\EntityRelationMap;
@@ -93,9 +94,13 @@ class EntitySchemaFactory
             ];
         }
 
-        return new Schema([
+        $schema = new Schema([
             'query' => new ObjectType($query),
         ]);
+
+        echo SchemaPrinter::doPrint($schema);
+
+        return $schema;
     }
 
     protected function buildEntityInterfaceType(): Type

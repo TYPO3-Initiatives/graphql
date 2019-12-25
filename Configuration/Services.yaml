@@ -4,6 +4,11 @@ services:
     autoconfigure: true
     public: false
 
+  cache.gql:
+    class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+    factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
+    arguments: ['gql']
+
   TYPO3\CMS\GraphQL\:
     resource: '../Classes/*'
 
